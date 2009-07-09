@@ -1,5 +1,5 @@
-//
-//
+// License GNU GPL v3
+// (C) Kalle Persson, Hylke Bons, Jakub Steiner
 //
 //
 
