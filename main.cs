@@ -23,9 +23,10 @@ public class Sticky {
 		NotesDatabase db = new NotesDatabase();
 		Window background_window = new Window("Sticky");
 		background_window.Opacity = 0.85;
-                background_window.ModifyBg( StateType.Normal, new Gdk.Color (0, 0, 0) );
+        background_window.ModifyBg( StateType.Normal, new Gdk.Color (0, 0, 0) );
 		background_window.Decorated = false;
 		background_window.Fullscreen(); // Fullscreen() later
+		background_window.DeleteEvent += new DeleteEventHandler (Window_Delete);
 		background_window.ShowAll(); 
 
 		NoteData[] Notes = db.fetch_notes();
@@ -36,6 +37,13 @@ public class Sticky {
 			notewindows[0] = new NoteWindow(x,background_window);
 		}
 	}
+
+	static void Window_Delete (object obj, DeleteEventArgs args)
+	{
+		Application.Quit ();
+		args.RetVal = true;
+	}
+
 }
 
 public class NoteWindow {
