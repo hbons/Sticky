@@ -22,7 +22,8 @@ public class Sticky {
 	public static void ShowNotes(object obj, EventArgs args) {
 		NotesDatabase db = new NotesDatabase();
 		Window background_window = new Window("Sticky");
-		background_window.Opacity = 0.5;
+		background_window.Opacity = 0.75;
+                background_window.ModifyBg( StateType.Normal, new Gdk.Color (0, 0, 0) );
 		background_window.Decorated = false;
 		background_window.Maximize(); // Fullscreen() later
 		background_window.ShowAll(); 
