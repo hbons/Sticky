@@ -22,7 +22,7 @@ public class Sticky {
 	public static void ShowNotes(object obj, EventArgs args) {
 		NotesDatabase db = new NotesDatabase();
 		Window background_window = new Window("Sticky");
-		background_window.Opacity = 0.75;
+		background_window.Opacity = 0.85;
                 background_window.ModifyBg( StateType.Normal, new Gdk.Color (0, 0, 0) );
 		background_window.Decorated = false;
 		background_window.Fullscreen(); // Fullscreen() later
@@ -50,7 +50,7 @@ public class NoteWindow {
 		this.window = new Window("Note");
 		this.window.TransientFor = parent;
 		this.window.DestroyWithParent = true;
-		this.window.Resize (200, 250);
+		this.window.Resize (250, 200);
 		this.window.Move(this.data.get_pos_x(), this.data.get_pos_y());
 		//this.window.HasFrame = true;
 		//this.window.SetFrameDimensions(12, 12, 12, 12);
@@ -59,10 +59,16 @@ public class NoteWindow {
 
 
 
+
+
 		this.view = new Gtk.TextView ();
 		this.buffer = this.view.Buffer;
 		this.buffer.Text = this.data.get_text();
                 this.view.WrapMode = Gtk.WrapMode.WordChar;
+                this.view.LeftMargin = 12;
+                this.view.RightMargin = 12;  
+                this.view.PixelsAboveLines = 12;
+                this.view.PixelsBelowLines = 12;
 
                 this.view.ModifyBase( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
 		this.window.Add(view);
