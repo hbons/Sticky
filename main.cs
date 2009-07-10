@@ -64,53 +64,47 @@ public class NoteWindow {
 		//this.window.SetFrameDimensions(12, 12, 12, 12);
 		this.window.Decorated = false;
                 
-
-
-
-
-
 		this.view = new Gtk.TextView ();
 		this.buffer = this.view.Buffer;
 		this.buffer.Text = this.data.get_text();
-                this.view.WrapMode = Gtk.WrapMode.WordChar;
-                this.view.LeftMargin = 12;
-                this.view.RightMargin = 12;  
-                this.view.PixelsAboveLines = 12;
-                this.view.PixelsBelowLines = 12;
+		//this.buffer.OnChanged += new TextBuffer.Changed(this.SaveNotes);
+		
+        this.view.WrapMode = Gtk.WrapMode.WordChar;
+        this.view.LeftMargin = 12;
+        this.view.RightMargin = 12;  
+        this.view.PixelsAboveLines = 12;
+        this.view.PixelsBelowLines = 12;
 
+		//this.view.InsertAtCursor += new Gtk.InsertAtCursorHandler(this.SaveNotes);
 
-
-	        this.view.InsertAtCursor += new InsertAtCursorHandler(SaveNotes);
-
-
-
-
-                this.view.ModifyBase( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
+        this.view.ModifyBase( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
 		this.window.Add(view);
 		this.window.ShowAll();	 
 	}
 
-	        public static void SaveNotes(object obj, InsertAtCursorArgs args) {
-                        Console.WriteLine ("Some text changed...");
-                }
-
-
-
- }
-
+	public static void SaveNotes(object obj, InsertAtCursorArgs args) {
+		Console.WriteLine ("Some text changed...");
+	}
+}
 
 public class NoteData {
 
+	private int id;
 	private String text;
 	private String color;
 	private int pos_x;
 	private int pos_y;
 
-	public NoteData(String text, String color, int pos_x, int pos_y) {
+	public NoteData(String text, String color, int pos_x, int pos_y,int id) {
+		this.id = id;
 		this.text = text;
 		this.color = color;
 		this.pos_x = pos_x;
 		this.pos_y = pos_y;
+	}
+
+	public int get_id() {
+		return id;
 	}
 
 	public String get_text() {
@@ -127,6 +121,10 @@ public class NoteData {
 
 	public int get_pos_y() {
 		return pos_y;
+	}
+
+	public void set_id(int id) {
+		this.id = id;
 	}
 
 	public void set_text(String text) {
@@ -188,15 +186,28 @@ public class NotesDatabase {
 		IDataReader note_reader = dbcmd.ExecuteReader();
 		int row = 0;
 		while(note_reader.Read()){
-			arr[row] = new NoteData(note_reader.GetString (0), note_reader.GetString (1), int.Parse(note_reader.GetString (2)), int.Parse(note_reader.GetString (3)));
+			arr[row] = new NoteData(
+				note_reader.GetString (0),
+				note_reader.GetString (1),
+				int.Parse(note_reader.GetString (2)),
+				int.Parse(note_reader.GetString (3)),
+				int.Parse(note_reader.GetString (4))
+			);
 			row++;
 		}
 
 		note_reader.Close();
 		note_reader = null;
-
 		this.close_connection();
-
 		return arr;
+	}
+
+	public void SaveNote(NoteData note_data) {
+		this.open_connection ();
+
+		this.dbcmd.CommandText = "UPDATE TABLE notes SET text = " + note_data.get_text() + " WHERE id = " + note_data.get_id();
+		dbcmd.ExecuteReader();
+
+		this.close_connection();			
 	}
 }
