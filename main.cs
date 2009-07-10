@@ -25,7 +25,7 @@ public class Sticky {
 		background_window.Opacity = 0.75;
                 background_window.ModifyBg( StateType.Normal, new Gdk.Color (0, 0, 0) );
 		background_window.Decorated = false;
-		background_window.Maximize(); // Fullscreen() later
+		background_window.Fullscreen(); // Fullscreen() later
 		background_window.ShowAll(); 
 
 		NoteData[] Notes = db.fetch_notes();
@@ -55,11 +55,16 @@ public class NoteWindow {
 		//this.window.HasFrame = true;
 		//this.window.SetFrameDimensions(12, 12, 12, 12);
 		this.window.Decorated = false;
+                
+
+
 
 		this.view = new Gtk.TextView ();
 		this.buffer = this.view.Buffer;
 		this.buffer.Text = this.data.get_text();
+                this.view.WrapMode = Gtk.WrapMode.WordChar;
 
+                this.view.ModifyBase( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
 		this.window.Add(view);
 		this.window.ShowAll();	 
 	}
