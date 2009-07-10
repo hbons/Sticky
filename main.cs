@@ -38,14 +38,6 @@ using Gtk;
      }
 
 
-/*
-     NoteWindow[] notes = new NoteWindow[4];
-     notes[0] = new NoteWindow( new NoteData ("Have you been high today?", "#00ff00", 470, 256), background_window);
-     notes[1] = new NoteWindow( new NoteData ("I see the nuns are gay!", "#00ff00", 100, 152), background_window);
-     notes[2] = new NoteWindow( new NoteData ("Now poop on them Oliver!", "#00ff00", 600, 234), background_window);
-     notes[3] = new NoteWindow( new NoteData ("test?", "#00ff00", 360, 55), background_window);
-*/
-
 
 
    }
