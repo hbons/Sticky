@@ -19,11 +19,10 @@ public class Sticky {
 		Application.Run();
 	}
 
-public static void AddNote(object obj, EventArgs args){
-Console.WriteLine ("clicked");
+	public static void AddNote(object obj, EventArgs args){
+		Console.WriteLine ("clicked");
 
-
-}
+	}
 
 	public static void ShowNotes(object obj, EventArgs args) {
 		NotesDatabase db = new NotesDatabase();
@@ -34,30 +33,21 @@ Console.WriteLine ("clicked");
 		background_window.Maximize(); // Fullscreen() later
 		background_window.DeleteEvent += new DeleteEventHandler (Window_Delete);
 
-
-		NoteData[] Notes = db.fetch_notes();
-
-		NoteWindow[] notewindows = new NoteWindow[Notes.Length];
-
-		foreach(NoteData x in Notes) {
-			notewindows[0] = new NoteWindow(x,background_window);
-		}
-
-
-
-
 		Button add_button = new Button();
-		Icon add_icon = new Icon();
 		add_button.Image =  new Gtk.Image (Stock.Add, IconSize.Menu);
 		add_button.Clicked += new EventHandler(AddNote);
 		Fixed grid = new Fixed();
 		grid.Put(add_button, 12, 12);
 		background_window.Add (grid);
 
-
-
-
 		background_window.ShowAll(); 
+
+		NoteData[] Notes = db.fetch_notes();
+		NoteWindow[] notewindows = new NoteWindow[Notes.Length];
+
+		foreach(NoteData x in Notes) {
+			notewindows[0] = new NoteWindow(x,background_window);
+		}
 
 
 	}
@@ -91,7 +81,7 @@ public class NoteWindow {
 		this.view = new Gtk.TextView ();
 		this.buffer = this.view.Buffer;
 		this.buffer.Text = this.data.get_text();
-		//this.buffer.OnChanged += new TextBuffer.Changed(this.SaveNotes);
+		this.buffer.Changed += new System.EventHandler(this.SaveNotes);
 		
         this.view.WrapMode = Gtk.WrapMode.WordChar;
         this.view.LeftMargin = 12;
@@ -99,17 +89,19 @@ public class NoteWindow {
         this.view.PixelsAboveLines = 12;
         this.view.PixelsBelowLines = 12;
 
-		//this.view.InsertAtCursor += new Gtk.InsertAtCursorHandler(this.SaveNotes);
-
         this.view.ModifyBase( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
+
 		this.window.Add(view);
 		this.window.ShowAll();	 
 	}
 
-	public static void SaveNotes(object obj, InsertAtCursorArgs args) {
-		Console.WriteLine ("Some text changed...");
+	public void SaveNotes(object sender, System.EventArgs args) {
+		NotesDatabase db = new NotesDatabase();
+		Console.WriteLine (this.buffer.Text);
+		//db.SaveNote(this.data);
 	}
 }
+
 
 public class NoteData {
 
