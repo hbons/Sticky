@@ -70,10 +70,23 @@ public class NoteWindow {
                 this.view.PixelsAboveLines = 12;
                 this.view.PixelsBelowLines = 12;
 
+
+
+	        this.view.InsertAtCursor += new InsertAtCursorHandler(SaveNotes);
+
+
+
+
                 this.view.ModifyBase( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
 		this.window.Add(view);
 		this.window.ShowAll();	 
 	}
+
+	        public static void SaveNotes(object obj, InsertAtCursorArgs args) {
+                        Console.WriteLine ("Some text changed...");
+                }
+
+
 
  }
 
