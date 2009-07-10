@@ -19,6 +19,12 @@ public class Sticky {
 		Application.Run();
 	}
 
+public static void AddNote(object obj, EventArgs args){
+Console.WriteLine ("clicked");
+
+
+}
+
 	public static void ShowNotes(object obj, EventArgs args) {
 		NotesDatabase db = new NotesDatabase();
 		Window background_window = new Window("Sticky");
@@ -27,7 +33,7 @@ public class Sticky {
 		background_window.Decorated = false;
 		background_window.Maximize(); // Fullscreen() later
 		background_window.DeleteEvent += new DeleteEventHandler (Window_Delete);
-		background_window.ShowAll(); 
+
 
 		NoteData[] Notes = db.fetch_notes();
 
@@ -36,6 +42,24 @@ public class Sticky {
 		foreach(NoteData x in Notes) {
 			notewindows[0] = new NoteWindow(x,background_window);
 		}
+
+
+
+
+		Button add_button = new Button();
+		Icon add_icon = new Icon();
+		add_button.Image =  new Gtk.Image (Stock.Add, IconSize.Menu);
+		add_button.Clicked += new EventHandler(AddNote);
+		Fixed grid = new Fixed();
+		grid.Put(add_button, 12, 12);
+		background_window.Add (grid);
+
+
+
+
+		background_window.ShowAll(); 
+
+
 	}
 
 	static void Window_Delete (object obj, DeleteEventArgs args)
