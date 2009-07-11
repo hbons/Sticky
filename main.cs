@@ -13,10 +13,82 @@ public class Sticky {
 
 	public static void Main() {
 		Application.Init();
-		//Create the Window
-		StatusIcon status_icon = StatusIcon.NewFromIconName("tomboy");
-		status_icon.Activate += new EventHandler(ShowNotes);
+		StickyUI UI = new StickyUI();
+
+
 		Application.Run();
+	}
+}
+
+public class StickyUI {
+
+	public StatusIcon status_icon;
+	public bool notes_showing;
+	public Window background_window;
+	public EventBox add_eventbox;
+	public Fixed grid;
+	public NotesDatabase db;
+
+	public NoteData[] notes;
+	public NoteWindow[] note_windows;
+	
+	public StickyUI() {
+		this.SetupWindow();
+		this.LoadNotes();
+		this.background_window.HideAll(); 			
+		this.notes_showing = false;
+		this.status_icon = StatusIcon.NewFromIconName("tomboy");
+		this.status_icon.Activate += new EventHandler(this.ToggleNotes);
+	}
+
+	public void ToggleNotes(object obj, EventArgs args) {
+		if(!this.notes_showing) {
+			this.notes_showing = true;
+			this.background_window.ShowAll(); 
+			foreach(NoteWindow x in this.note_windows) {
+				x.window.ShowAll();
+			}
+		}
+		else {
+			this.notes_showing = false;
+			this.background_window.HideAll();
+			foreach(NoteWindow x in this.note_windows) {
+				x.window.Hide();
+			} 			
+		}
+	}
+
+	public void SetupWindow() {
+		this.background_window = new Window("Sticky");
+		this.background_window.Opacity = 0.75;
+        this.background_window.ModifyBg( StateType.Normal, new Gdk.Color (0, 0, 0) );
+		this.background_window.Decorated = false;
+		this.background_window.Maximize(); // Fullscreen() later
+		this.background_window.DeleteEvent += new DeleteEventHandler (Window_Delete);
+
+		this.add_eventbox = new EventBox();
+		this.add_eventbox.Add(new Gtk.Image("./note-add.png"));
+		this.add_eventbox.VisibleWindow = false;
+		this.add_eventbox.ButtonPressEvent += new ButtonPressEventHandler (AddNote);
+		this.grid = new Fixed();
+		this.grid.Put(add_eventbox, 12, 12);
+		this.background_window.Add (this.grid);
+	}
+
+	public void LoadNotes() {
+
+		this.db = new NotesDatabase();
+
+		this.notes = db.fetch_notes();
+		this.note_windows = new NoteWindow[this.notes.Length];
+
+		int i = 0;
+		foreach(NoteData x in this.notes) {
+			this.note_windows[i] = new NoteWindow(x,background_window);
+			i++;
+		}
+
+		Console.WriteLine(this.note_windows[1]);
 	}
 
 	public static void AddNote(object obj, EventArgs args){
@@ -28,47 +100,12 @@ public class Sticky {
 		Console.WriteLine("Adding note!");
 		db = new NotesDatabase();
 		last_id = db.CreateNote();
-
+		/*
 		Console.WriteLine(obj.Parent);
 		
 		new_data = new NoteData("...","ffffff",100,100,last_id);
-		//new_window = new NoteWindow(new_data,);
-	}
-
-	public static void ShowNotes(object obj, EventArgs args) {
-
-		NotesDatabase db;
-		EventBox add_eventbox;
-		Window background_window;
-
-		db = new NotesDatabase();
-		background_window = new Window("Sticky");
-		background_window.Opacity = 0.85;
-        background_window.ModifyBg( StateType.Normal, new Gdk.Color (0, 0, 0) );
-		background_window.Decorated = false;
-		background_window.Maximize(); // Fullscreen() later
-		background_window.DeleteEvent += new DeleteEventHandler (Window_Delete);
-
-		add_eventbox = new EventBox();
-		add_eventbox.Add(new Gtk.Image("./note-add.png"));
-		//add_eventbox.Relief = Gtk.ReliefStyle.None;
-		add_eventbox.Realize();
-		add_eventbox.ButtonPressEvent += new ButtonPressEventHandler (AddNote);
-		//add_eventbox.Clicked += new EventHandler(AddNote);
-		Fixed grid = new Fixed();
-		grid.Put(add_eventbox, 12, 12);
-		background_window.Add (grid);
-
-		background_window.ShowAll(); 
-
-		NoteData[] Notes = db.fetch_notes();
-		NoteWindow[] notewindows = new NoteWindow[Notes.Length];
-
-		foreach(NoteData x in Notes) {
-			notewindows[0] = new NoteWindow(x,background_window);
-		}
-
-
+		new_window = new NoteWindow(new_data,);
+		*/
 	}
 
 	static void Window_Delete (object obj, DeleteEventArgs args)
@@ -82,7 +119,7 @@ public class Sticky {
 public class NoteWindow {
 
 	public NoteData data;
-	private Window window;
+	public Window window;
 	private Gtk.TextView view;
 	private Gtk.TextBuffer buffer;
 
@@ -96,12 +133,14 @@ public class NoteWindow {
 		//this.window.HasFrame = true;
 		//this.window.SetFrameDimensions(12, 12, 12, 12);
 		this.window.Decorated = false;
+		this.window.SkipPagerHint = true;
+		this.window.SkipTaskbarHint = true;
                 
 		this.view = new Gtk.TextView ();
 		this.buffer = this.view.Buffer;
 		this.buffer.Text = this.data.get_text();
-		//this.window.OnConfigureEvent += new System.EventHandler(this.window_position_changed);
-		this.buffer.Changed += new System.EventHandler(this.text_change);
+		this.window.ConfigureEvent += this.window_position_changed;
+		this.buffer.Changed += this.text_change;
 		
         this.view.WrapMode = Gtk.WrapMode.WordChar;
         this.view.LeftMargin = 12;
@@ -110,9 +149,7 @@ public class NoteWindow {
         this.view.PixelsBelowLines = 12;
 
         this.view.ModifyBase( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
-
 		this.window.Add(view);
-		this.window.ShowAll();	 
 	}
 
 	public void text_change(object sender, System.EventArgs args) {
@@ -120,11 +157,15 @@ public class NoteWindow {
 		NotesDatabase db = new NotesDatabase();
 		Console.WriteLine (this.buffer.Text);
 		this.data.set_text (this.buffer.Text);
-		db.SaveNote(this.data);
+		db.UpdateNoteContent(this.data);
 	}
 	
+	[GLib.ConnectBefore]
 	public void window_position_changed(object sender, System.EventArgs args) {
-		
+		//Console.WriteLine(this.window.WindowPosition);
+		//this.note_data.set_pos_x();
+		//this.note_data.set_pos_x();
+		Console.WriteLine("Note was moved!");
 	}
 }
 
@@ -244,7 +285,7 @@ public class NotesDatabase {
 		return arr;
 	}
 
-	public void SaveNote(NoteData note_data) {
+	public void UpdateNoteContent(NoteData note_data) {
 		this.open_connection ();
 
 		
@@ -254,6 +295,17 @@ public class NotesDatabase {
 
 		this.close_connection();			
 	}
+
+	public void UpdateNotePosition(NoteData note_data) {
+		this.open_connection ();
+		
+		this.dbcmd.CommandText = "UPDATE notes SET pos_x = " + note_data.get_pos_x() + ", pos_y = " + note_data.get_pos_y() + " WHERE id = " + note_data.get_id();
+		Console.WriteLine(this.dbcmd.CommandText);
+		this.dbcmd.ExecuteNonQuery();
+
+		this.close_connection();			
+	}
+
 
 	public int CreateNote() {
 		this.open_connection ();
