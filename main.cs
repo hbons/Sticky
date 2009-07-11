@@ -81,7 +81,7 @@ public class NoteWindow {
 		this.view = new Gtk.TextView ();
 		this.buffer = this.view.Buffer;
 		this.buffer.Text = this.data.get_text();
-		this.buffer.Changed += new System.EventHandler(this.SaveNotes);
+		this.buffer.Changed += new System.EventHandler(this.text_change);
 		
         this.view.WrapMode = Gtk.WrapMode.WordChar;
         this.view.LeftMargin = 12;
@@ -95,10 +95,11 @@ public class NoteWindow {
 		this.window.ShowAll();	 
 	}
 
-	public void SaveNotes(object sender, System.EventArgs args) {
+	public void text_change(object sender, System.EventArgs args) {
 		NotesDatabase db = new NotesDatabase();
 		Console.WriteLine (this.buffer.Text);
-		//db.SaveNote(this.data);
+		this.data.set_text (this.buffer.Text);
+		db.SaveNote(this.data);
 	}
 }
 
@@ -221,8 +222,11 @@ public class NotesDatabase {
 	public void SaveNote(NoteData note_data) {
 		this.open_connection ();
 
-		this.dbcmd.CommandText = "UPDATE TABLE notes SET text = " + note_data.get_text() + " WHERE id = " + note_data.get_id();
-		dbcmd.ExecuteReader();
+
+Console.WriteLine(note_data.get_text());
+
+		this.dbcmd.CommandText = "UPDATE notes SET text = \"" + note_data.get_text() + "\" WHERE id = " + note_data.get_id();
+		this.dbcmd.ExecuteNonQuery(); // this is broken
 
 		this.close_connection();			
 	}
