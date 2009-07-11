@@ -148,27 +148,33 @@ public class NoteWindow {
         this.view.WrapMode = Gtk.WrapMode.WordChar;
 
 		this.font_size = "12";
-		if (this.buffer.LineCount > 6)
-			font_size = "11";
-		if (this.buffer.LineCount > 7)
-			font_size = "10";
-		if (this.buffer.LineCount > 8)
-			font_size = "9";
-		if (this.buffer.LineCount > 9)
-			font_size = "8";
-
-		this.view.ModifyFont(Pango.FontDescription.FromString("Sans " + font_size));
+		this.resize_font();
 
         this.window.ModifyBg( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
         this.view.ModifyBase( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
 		this.window.Add(view);
 	}
 
+	public void resize_font() {
+		if (this.buffer.LineCount > 6)
+			this.font_size = "11";
+		if (this.buffer.LineCount > 7)
+			this.font_size = "10";
+		if (this.buffer.LineCount > 8)
+			this.font_size = "9";
+		if (this.buffer.LineCount > 9)
+			this.font_size = "8";
+		this.view.ModifyFont(Pango.FontDescription.FromString("Serif " + this.font_size));
+	}
+
 	public void text_change(object sender, System.EventArgs args) {
 		//Console.WriteLine(this.window.GetPosition());
 		NotesDatabase db = new NotesDatabase();
 		Console.WriteLine (this.buffer.Text);
+
 		this.data.set_text (this.buffer.Text);
+		this.resize_font();
+
 		db.UpdateNoteContent(this.data);
 	}
 	
@@ -252,6 +258,7 @@ public class NotesDatabase {
 	public IDbCommand dbcmd;
 
 	public NotesDatabase() {
+		this.SetupDatabase();
 
 	}
 
@@ -268,6 +275,22 @@ public class NotesDatabase {
 		this.dbcon.Close();
 		this.dbcon = null;		 
 	}
+
+	private void SetupDatabase() {
+		this.open_connection ();
+		try {
+			this.dbcmd.CommandText = "SELECT * FROM notes";
+			this.dbcmd.ExecuteNonQuery();
+		}
+		catch (SqliteSyntaxException no_table) {
+			this.dbcmd.CommandText = "CREATE TABLE notes (text TEXT, color TEXT, pos_x INTEGER, pos_y INTEGER, id INTEGER PRIMARY KEY AUTOINCREMENT)";
+			this.dbcmd.ExecuteNonQuery();
+			this.dbcmd.CommandText = "INSERT INTO notes(text,color,pos_x,pos_y) VALUES ('Welcome to Sticky! This is your first note. Just click on it to edit it. Do not worry about saving it, it is all automatic.','ffffff',100,100)";
+			this.dbcmd.ExecuteNonQuery();
+			this.close_connection();
+		}
+	}
+
 
 	public NoteData[] fetch_notes() {
 		this.open_connection();
