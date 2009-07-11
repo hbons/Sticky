@@ -145,8 +145,19 @@ public class NoteWindow {
         this.view.WrapMode = Gtk.WrapMode.WordChar;
         this.view.LeftMargin = 12;
         this.view.RightMargin = 12;  
-        this.view.PixelsAboveLines = 12;
-        this.view.PixelsBelowLines = 12;
+
+
+		string font_size = "12";
+		if (this.buffer.LineCount > 6)
+			font_size = "11";
+		if (this.buffer.LineCount > 7)
+			font_size = "10";
+		if (this.buffer.LineCount > 8)
+			font_size = "9";
+		if (this.buffer.LineCount > 9)
+			font_size = "8";
+
+		this.view.ModifyFont(Pango.FontDescription.FromString("Sans " + font_size));
 
         this.view.ModifyBase( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
 		this.window.Add(view);
@@ -157,6 +168,19 @@ public class NoteWindow {
 		NotesDatabase db = new NotesDatabase();
 		Console.WriteLine (this.buffer.Text);
 		this.data.set_text (this.buffer.Text);
+
+		string font_size = "12";
+		if (this.buffer.LineCount > 6)
+			font_size = "11";
+		if (this.buffer.LineCount > 7)
+			font_size = "10";
+		if (this.buffer.LineCount > 8)
+			font_size = "9";
+		if (this.buffer.LineCount > 9)
+			font_size = "8";
+
+		this.view.ModifyFont(Pango.FontDescription.FromString("Sans " + font_size));
+
 		db.UpdateNoteContent(this.data);
 	}
 	
