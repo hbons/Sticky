@@ -20,24 +20,32 @@ public class Sticky {
 	}
 
 	public static void AddNote(object obj, EventArgs args){
-		Console.WriteLine ("clicked");
-
+		Console.WriteLine("Add note!");
+		//newNote = new NoteWindow();
 	}
 
 	public static void ShowNotes(object obj, EventArgs args) {
-		NotesDatabase db = new NotesDatabase();
-		Window background_window = new Window("Sticky");
+
+		NotesDatabase db;
+		EventBox add_eventbox;
+		Window background_window;
+
+		db = new NotesDatabase();
+		background_window = new Window("Sticky");
 		background_window.Opacity = 0.85;
         background_window.ModifyBg( StateType.Normal, new Gdk.Color (0, 0, 0) );
 		background_window.Decorated = false;
 		background_window.Maximize(); // Fullscreen() later
 		background_window.DeleteEvent += new DeleteEventHandler (Window_Delete);
 
-		Button add_button = new Button();
-		add_button.Image =  new Gtk.Image (Stock.Add, IconSize.Menu);
-		add_button.Clicked += new EventHandler(AddNote);
+		add_eventbox = new EventBox();
+		add_eventbox.Add(new Gtk.Image("./note-add.png"));
+		//add_eventbox.Relief = Gtk.ReliefStyle.None;
+		add_eventbox.Realize();
+		add_eventbox.ButtonPressEvent += new ButtonPressEventHandler (AddNote);
+		//add_eventbox.Clicked += new EventHandler(AddNote);
 		Fixed grid = new Fixed();
-		grid.Put(add_button, 12, 12);
+		grid.Put(add_eventbox, 12, 12);
 		background_window.Add (grid);
 
 		background_window.ShowAll(); 
