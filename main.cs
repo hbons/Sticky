@@ -20,8 +20,19 @@ public class Sticky {
 	}
 
 	public static void AddNote(object obj, EventArgs args){
-		Console.WriteLine("Add note!");
-		//newNote = new NoteWindow();
+		int last_id;
+		NoteData new_data;
+		NoteWindow new_window;
+		NotesDatabase db;
+
+		Console.WriteLine("Adding note!");
+		db = new NotesDatabase();
+		last_id = db.CreateNote();
+
+		Console.WriteLine(obj.Parent);
+		
+		new_data = new NoteData("...","ffffff",100,100,last_id);
+		//new_window = new NoteWindow(new_data,);
 	}
 
 	public static void ShowNotes(object obj, EventArgs args) {
@@ -89,6 +100,7 @@ public class NoteWindow {
 		this.view = new Gtk.TextView ();
 		this.buffer = this.view.Buffer;
 		this.buffer.Text = this.data.get_text();
+		//this.window.OnConfigureEvent += new System.EventHandler(this.window_position_changed);
 		this.buffer.Changed += new System.EventHandler(this.text_change);
 		
         this.view.WrapMode = Gtk.WrapMode.WordChar;
@@ -104,10 +116,15 @@ public class NoteWindow {
 	}
 
 	public void text_change(object sender, System.EventArgs args) {
+		//Console.WriteLine(this.window.GetPosition());
 		NotesDatabase db = new NotesDatabase();
 		Console.WriteLine (this.buffer.Text);
 		this.data.set_text (this.buffer.Text);
 		db.SaveNote(this.data);
+	}
+	
+	public void window_position_changed(object sender, System.EventArgs args) {
+		
 	}
 }
 
@@ -230,12 +247,27 @@ public class NotesDatabase {
 	public void SaveNote(NoteData note_data) {
 		this.open_connection ();
 
-
-Console.WriteLine(note_data.get_text());
-
-		this.dbcmd.CommandText = "UPDATE notes SET text = \"" + note_data.get_text() + "\" WHERE id = " + note_data.get_id();
-		this.dbcmd.ExecuteNonQuery(); // this is broken
+		
+		this.dbcmd.CommandText = "UPDATE notes SET text = '" + note_data.get_text() + "', pos_x = " + note_data.get_pos_x() + ", pos_y = " + note_data.get_pos_y() + " WHERE id = " + note_data.get_id();
+		Console.WriteLine(this.dbcmd.CommandText);
+		this.dbcmd.ExecuteNonQuery();
 
 		this.close_connection();			
+	}
+
+	public int CreateNote() {
+		this.open_connection ();
+
+		this.dbcmd.CommandText = "INSERT INTO notes (text,color,pos_x,pos_y) VALUES ('...','ffffff',100,100)";
+		this.dbcmd.ExecuteNonQuery();
+
+		this.dbcmd.CommandText = "SELECT id FROM notes ORDER BY id DESC";
+		IDataReader last_id_reader = dbcmd.ExecuteReader();
+		last_id_reader.Read();
+		int last_id = int.Parse(last_id_reader.GetString (0));
+		Console.WriteLine(last_id);
+
+		this.close_connection();
+		return last_id;
 	}
 }
