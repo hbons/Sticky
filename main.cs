@@ -146,13 +146,6 @@ public class NoteWindow {
 		this.buffer.Changed += this.text_change;
 		
         this.view.WrapMode = Gtk.WrapMode.WordChar;
-<<<<<<< HEAD:main.cs
-        this.view.LeftMargin = 12;
-        this.view.RightMargin = 12;  
-        this.view.PixelsAboveLines = 12;
-        this.view.PixelsBelowLines = 12;
-=======
-
 
 		this.font_size = "12";
 		if (this.buffer.LineCount > 6)
@@ -165,7 +158,6 @@ public class NoteWindow {
 			font_size = "8";
 
 		this.view.ModifyFont(Pango.FontDescription.FromString("Sans " + font_size));
->>>>>>> origin/master:main.cs
 
         this.window.ModifyBg( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
         this.view.ModifyBase( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
@@ -180,21 +172,6 @@ public class NoteWindow {
 		db.UpdateNoteContent(this.data);
 	}
 	
-<<<<<<< HEAD:main.cs
-	[GLib.ConnectBefore]
-	public void window_position_changed(object sender, System.EventArgs args) {
-		//Console.WriteLine(this.window.WindowPosition);
-		int x;
-		int y;
-		this.window.GetPosition(out x, out y);
-		this.data.set_pos_x (x);
-		this.data.set_pos_y (y);
-		NotesDatabase db = new NotesDatabase();
-		db.UpdateNoteContent(this.data);
-		Console.WriteLine("To: " + x + " " + y);
-		Console.WriteLine("Note was moved!");
-
-=======
 	[GLib.ConnectBefore]
 	public void window_position_changed(object sender, System.EventArgs args) {
 		//Console.WriteLine(this.window.WindowPosition);
@@ -205,7 +182,6 @@ public class NoteWindow {
 		this.data.set_pos_y (y);
 		NotesDatabase db = new NotesDatabase();
 		db.UpdateNotePosition(this.data);
->>>>>>> origin/master:main.cs
 	}
 }
 
