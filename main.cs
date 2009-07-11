@@ -189,9 +189,13 @@ public class NoteWindow {
 	[GLib.ConnectBefore]
 	public void window_position_changed(object sender, System.EventArgs args) {
 		//Console.WriteLine(this.window.WindowPosition);
-		//this.note_data.set_pos_x();
-		//this.note_data.set_pos_x();
-		Console.WriteLine("Note was moved!");
+		int x;
+		int y;
+		this.window.GetPosition(out x, out y);
+		this.data.set_pos_x (x);
+		this.data.set_pos_y (y);
+		NotesDatabase db = new NotesDatabase();
+		db.UpdateNotePosition(this.data);
 	}
 }
 
@@ -279,16 +283,11 @@ public class NotesDatabase {
 
 	public NoteData[] fetch_notes() {
 		this.open_connection();
-
-		this.dbcmd.CommandText = "SELECT COUNT(*) FROM notes";
+		this.dbcmd.CommandText = "SELECT COUNT(id) FROM notes";
 		IDataReader count_reader = dbcmd.ExecuteReader();
-
 		count_reader.Read();
 		string count = count_reader.GetString (0);
-		Console.WriteLine("Number of rows: " + count);
 		count_reader.Close();
-		count_reader = null;
-		
 		NoteData[] arr = new NoteData[int.Parse(count)];
 
 		this.dbcmd.CommandText = "SELECT * FROM notes";
@@ -313,22 +312,15 @@ public class NotesDatabase {
 
 	public void UpdateNoteContent(NoteData note_data) {
 		this.open_connection ();
-
-		
-		this.dbcmd.CommandText = "UPDATE notes SET text = '" + note_data.get_text() + "', pos_x = " + note_data.get_pos_x() + ", pos_y = " + note_data.get_pos_y() + " WHERE id = " + note_data.get_id();
-		Console.WriteLine(this.dbcmd.CommandText);
+		this.dbcmd.CommandText = "UPDATE notes SET text = '" + note_data.get_text() + "' WHERE id = " + note_data.get_id();
 		this.dbcmd.ExecuteNonQuery();
-
 		this.close_connection();			
 	}
 
 	public void UpdateNotePosition(NoteData note_data) {
 		this.open_connection ();
-		
 		this.dbcmd.CommandText = "UPDATE notes SET pos_x = " + note_data.get_pos_x() + ", pos_y = " + note_data.get_pos_y() + " WHERE id = " + note_data.get_id();
-		Console.WriteLine(this.dbcmd.CommandText);
 		this.dbcmd.ExecuteNonQuery();
-
 		this.close_connection();			
 	}
 
