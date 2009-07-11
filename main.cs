@@ -51,9 +51,9 @@ public class StickyUI {
 		}
 		else {
 			this.notes_showing = false;
-			this.background_window.HideAll();
 			foreach(NoteWindow x in this.note_windows) {
 				x.window.Hide();
+				this.background_window.HideAll();
 			} 			
 		}
 	}
@@ -237,6 +237,8 @@ public class NoteData {
 	}
 
 	public void set_text(String text) {
+		text = text.Replace('"', '\"');
+		text = text.Replace("'", "`"); // Dirty hack
 		this.text = text;
 	}
 
