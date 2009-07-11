@@ -138,7 +138,7 @@ public class NoteWindow {
 		this.window.Decorated = false;
 		this.window.SkipPagerHint = true;
 		this.window.SkipTaskbarHint = true;
-                
+		this.window.BorderWidth = 12;
 		this.view = new Gtk.TextView ();
 		this.buffer = this.view.Buffer;
 		this.buffer.Text = this.data.get_text();
@@ -146,8 +146,7 @@ public class NoteWindow {
 		this.buffer.Changed += this.text_change;
 		
         this.view.WrapMode = Gtk.WrapMode.WordChar;
-        this.view.LeftMargin = 12;
-        this.view.RightMargin = 12;  
+
 
 		this.font_size = "12";
 		if (this.buffer.LineCount > 6)
@@ -161,6 +160,7 @@ public class NoteWindow {
 
 		this.view.ModifyFont(Pango.FontDescription.FromString("Sans " + font_size));
 
+        this.window.ModifyBg( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
         this.view.ModifyBase( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
 		this.window.Add(view);
 	}
