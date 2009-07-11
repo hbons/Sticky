@@ -46,13 +46,13 @@ public class StickyUI {
 			this.notes_showing = true;
 			this.background_window.ShowAll(); 
 			foreach(NoteWindow x in this.note_windows) {
-				x.window.ShowAll();
+				x.ShowAll();
 			}
 		}
 		else {
 			this.notes_showing = false;
 			foreach(NoteWindow x in this.note_windows) {
-				x.window.Hide();
+				x.Hide();
 				this.background_window.HideAll();
 			} 			
 		}
@@ -95,14 +95,12 @@ public class StickyUI {
 		NoteWindow new_window;
 		NotesDatabase db;
 
-		Console.WriteLine("Adding note!");
 		db = new NotesDatabase();
 		last_id = db.CreateNote();
 
 		new_data = new NoteData("","ffffff",500,500,last_id);
 		new_window = new NoteWindow(new_data,this.background_window);
-		Console.WriteLine(new_window);
-		new_window.window.ShowAll();
+		new_window.ShowAll();
 		/*
 		this.note_windows[this.note_windows.Length] = new_window;
 		new_window.window.ShowAll();
@@ -117,42 +115,47 @@ public class StickyUI {
 
 }
 
-public class NoteWindow {
+public class NoteWindow : Window {
 
 	public NoteData data;
-	public Window window;
 	private Gtk.TextView view;
 	private Gtk.TextBuffer buffer;
 	public string font_size;
+	private Gdk.Pixbuf image;
 
-	public NoteWindow (NoteData note_data, Window parent) {
+	public NoteWindow (NoteData note_data, Window parent) : base ("Note") {
 		this.data = note_data;
-		this.window = new Window("Note");
-		this.window.TransientFor = parent;
-		this.window.DestroyWithParent = true;
-		this.window.Opacity = 0.75;
-		this.window.Resize (250, 200);
-		this.window.Move(this.data.get_pos_x(), this.data.get_pos_y());
-		//this.window.HasFrame = true;
-		//this.window.SetFrameDimensions(12, 12, 12, 12);
-		this.window.Decorated = false;
-		this.window.SkipPagerHint = true;
-		this.window.SkipTaskbarHint = true;
-		this.window.BorderWidth = 12;
+		TransientFor = parent;
+		DestroyWithParent = true;
+		Opacity = 0.75;
+		Resize (250, 200);
+		Move(this.data.get_pos_x(), this.data.get_pos_y());
+		//HasFrame = true;
+		//SetFrameDimensions(12, 12, 12, 12);
+		Decorated = false;
+		SkipPagerHint = true;
+		SkipTaskbarHint = true;
+		BorderWidth = 12;
 		this.view = new Gtk.TextView ();
 		this.buffer = this.view.Buffer;
 		this.buffer.Text = this.data.get_text();
-		this.window.ConfigureEvent += this.window_position_changed;
+		ConfigureEvent += this.window_position_changed;
 		this.buffer.Changed += this.text_change;
 		
         this.view.WrapMode = Gtk.WrapMode.WordChar;
 
+
 		this.font_size = "12";
 		this.resize_font();
 
-        this.window.ModifyBg( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
         this.view.ModifyBase( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
-		this.window.Add(view);
+		this.view.ModifyBg( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
+
+        ModifyBg( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
+
+		image = new Gdk.Pixbuf( "noise.png" );
+
+		Add(view);
 	}
 
 	public void resize_font() {
@@ -164,26 +167,28 @@ public class NoteWindow {
 			this.font_size = "9";
 		if (this.buffer.LineCount > 9)
 			this.font_size = "8";
-		this.view.ModifyFont(Pango.FontDescription.FromString("Serif " + this.font_size));
+		this.view.ModifyFont(Pango.FontDescription.FromString("Rufscript " + this.font_size));
 	}
 
 	public void text_change(object sender, System.EventArgs args) {
-		//Console.WriteLine(this.window.GetPosition());
 		NotesDatabase db = new NotesDatabase();
-		Console.WriteLine (this.buffer.Text);
-
 		this.data.set_text (this.buffer.Text);
 		this.resize_font();
-
 		db.UpdateNoteContent(this.data);
+	}
+
+	protected override bool OnExposeEvent (Gdk.EventExpose evnt)
+	{
+		GdkWindow.DrawPixbuf (Style.WhiteGC, image, 0, 0, 0, 0,
+			Allocation.Width, Allocation.Height, Gdk.RgbDither.None, 0, 0);
+		return true;
 	}
 	
 	[GLib.ConnectBefore]
 	public void window_position_changed(object sender, System.EventArgs args) {
-		//Console.WriteLine(this.window.WindowPosition);
 		int x;
 		int y;
-		this.window.GetPosition(out x, out y);
+		GetPosition(out x, out y);
 		this.data.set_pos_x (x);
 		this.data.set_pos_y (y);
 		NotesDatabase db = new NotesDatabase();
@@ -291,7 +296,6 @@ public class NotesDatabase {
 		}
 	}
 
-
 	public NoteData[] fetch_notes() {
 		this.open_connection();
 		this.dbcmd.CommandText = "SELECT COUNT(id) FROM notes";
@@ -346,7 +350,6 @@ public class NotesDatabase {
 		IDataReader last_id_reader = dbcmd.ExecuteReader();
 		last_id_reader.Read();
 		int last_id = int.Parse(last_id_reader.GetString (0));
-		Console.WriteLine(last_id);
 
 		this.close_connection();
 		return last_id;
