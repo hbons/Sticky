@@ -88,7 +88,7 @@ public class StickyUI {
 		this.add_eventbox.VisibleWindow = false;
 		this.add_eventbox.ButtonPressEvent += new ButtonPressEventHandler (AddNote);
 		this.grid = new Fixed();
-		this.grid.Put(add_eventbox, 12, 12);
+		this.grid.Put(add_eventbox, 10, 10);
 		this.background_window.Add(this.grid);
 
 	}
