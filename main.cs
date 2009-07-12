@@ -87,6 +87,7 @@ public class StickyUI {
 		this.add_eventbox.Add(new Gtk.Image("./note-add.png"));
 		this.add_eventbox.VisibleWindow = false;
 		this.add_eventbox.ButtonPressEvent += new ButtonPressEventHandler (AddNote);
+		this.add_eventbox.EnterNotifyEvent += new EnterNotifyEventHandler (AddNote);
 		this.grid = new Fixed();
 		this.grid.Put(add_eventbox, 10, 10);
 		this.background_window.Add(this.grid);
@@ -169,20 +170,26 @@ public class NoteWindow : Window {
 		Add(view);
 	}
 
-	public void check_deletion(object sender, System.EventArgs args) {
-		//FIXME: This is an ugly hack. :)
-		if(this.buffer.Text == "") {
-			if(this.marked_for_deletion) {
-				Destroy();
+	public void check_deletion(object sender, Gtk.KeyReleaseEventArgs args) {
+		//FIXME: This is an ugly hack.
+        Gdk.Key key = args.Event.Key;
+		if(key == Gdk.Key.BackSpace) {
+			if(this.buffer.Text == "") {
+				if(this.marked_for_deletion) {
+					Destroy();
+				}
+				else {
+					this.marked_for_deletion = true;
+				}
 			}
 			else {
-				this.marked_for_deletion = true;
+				if(this.marked_for_deletion) {
+					this.marked_for_deletion = false;
+				}
 			}
 		}
-		else {
-			if(this.marked_for_deletion) {
-				this.marked_for_deletion = false;
-			}
+		else if(key != Gdk.Key.BackSpace && this.marked_for_deletion) {
+			this.marked_for_deletion = false;
 		}
 	}
 
