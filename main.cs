@@ -7,15 +7,18 @@ using System;
 using System.Data;
 using Mono.Data.SqliteClient;
 using Gtk;
+using GLib;
 
  
 public class Sticky {
 
-	public static void Main() {
+	public static void Main(String[] args) {
+		bool hide = false;
+		if(args.Length > 0 && args[0] == "-h") {
+			hide = true;
+		}
 		Application.Init();
-		StickyUI UI = new StickyUI();
-
-
+		StickyUI UI = new StickyUI(hide);
 		Application.Run();
 	}
 }
@@ -30,31 +33,41 @@ public class StickyUI {
 	public NotesDatabase db;
 
 	public NoteData[] notes;
-	public NoteWindow[] note_windows;
+	GLib.List note_windows;
 	
-	public StickyUI() {
+	public StickyUI(bool auto_hide) {
 		this.SetupWindow();
 		this.LoadNotes();
-		this.background_window.HideAll(); 			
-		this.notes_showing = false;
 		this.status_icon = StatusIcon.NewFromIconName("tomboy");
 		this.status_icon.Activate += new EventHandler(this.ToggleNotes);
+		if(!auto_hide) {		
+			this.notes_showing = true;
+			this.ShowNotes();
+		}
 	}
 
 	public void ToggleNotes(object obj, EventArgs args) {
 		if(!this.notes_showing) {
-			this.notes_showing = true;
-			this.background_window.ShowAll(); 
-			foreach(NoteWindow x in this.note_windows) {
-				x.ShowAll();
-			}
+			this.ShowNotes();
 		}
 		else {
-			this.notes_showing = false;
-			foreach(NoteWindow x in this.note_windows) {
-				x.Hide();
-				this.background_window.HideAll();
-			} 			
+			this.HideNotes();
+		} 			
+	}
+
+	public void ShowNotes() {
+		this.notes_showing = true;
+		this.background_window.ShowAll(); 
+		foreach(NoteWindow x in this.note_windows) {
+			x.ShowAll();
+		}
+	}
+
+	public void HideNotes() {
+		this.notes_showing = false;
+		foreach(NoteWindow x in this.note_windows) {
+			x.Hide();
+			this.background_window.HideAll();
 		}
 	}
 
@@ -66,6 +79,8 @@ public class StickyUI {
 		this.background_window.Maximize(); // Fullscreen() later
 		this.background_window.DeleteEvent += new DeleteEventHandler (Window_Delete);
 
+		this.note_windows = new GLib.List (typeof (NoteWindow));
+
 		this.add_eventbox = new EventBox();
 		this.add_eventbox.Add(new Gtk.Image("./note-add.png"));
 		this.add_eventbox.VisibleWindow = false;
@@ -73,19 +88,14 @@ public class StickyUI {
 		this.grid = new Fixed();
 		this.grid.Put(add_eventbox, 12, 12);
 		this.background_window.Add(this.grid);
+
 	}
 
 	public void LoadNotes() {
-
 		this.db = new NotesDatabase();
-
 		this.notes = db.fetch_notes();
-		this.note_windows = new NoteWindow[this.notes.Length];
-
-		int i = 0;
 		foreach(NoteData x in this.notes) {
-			this.note_windows[i] = new NoteWindow(x,background_window);
-			i++;
+			this.note_windows.Append(new NoteWindow(x,background_window));
 		}
 	}
 
@@ -101,10 +111,7 @@ public class StickyUI {
 		new_data = new NoteData("","ffffff",500,500,last_id);
 		new_window = new NoteWindow(new_data,this.background_window);
 		new_window.ShowAll();
-		/*
-		this.note_windows[this.note_windows.Length] = new_window;
-		new_window.window.ShowAll();
-		*/
+		this.note_windows.Append(new_window);
 	}
 
 	static void Window_Delete (object obj, DeleteEventArgs args)
