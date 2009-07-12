@@ -8,14 +8,17 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="48"
-   height="48"
+   width="24"
+   height="24"
    id="svg2"
    sodipodi:version="0.32"
    inkscape:version="0.46"
    version="1.0"
    sodipodi:docname="note-add.svg"
-   inkscape:output_extension="org.inkscape.output.svg.inkscape">
+   inkscape:output_extension="org.inkscape.output.svg.inkscape"
+   inkscape:export-filename="/home/hbons/Code/Sticky/note-add.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <defs
      id="defs4">
     <inkscape:perspective
@@ -36,12 +39,12 @@
      objecttolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2"
-     inkscape:cx="-5.935479"
-     inkscape:cy="40.649165"
+     inkscape:zoom="16"
+     inkscape:cx="22.212269"
+     inkscape:cy="11.705459"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
-     showgrid="false"
+     showgrid="true"
      inkscape:window-width="1280"
      inkscape:window-height="753"
      inkscape:window-x="0"
@@ -70,11 +73,8 @@
      transform="translate(-50,-410.36218)">
     <path
        style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
-       d="M 74,410.36218 C 60.752,410.36218 50.000002,421.11419 50,434.36218 C 50,447.61018 60.751998,458.36218 74,458.36218 C 87.248,458.36218 97.999996,447.61018 98,434.36218 C 98,421.11418 87.247997,410.36219 74,410.36218 z M 73.125,415.86218 L 74.875,415.86218 C 76.606252,415.86218 78,417.25593 78,418.98718 L 78,429.86218 L 88.875,429.86218 C 90.60625,429.86218 92,431.25593 92,432.98718 L 92,434.73718 C 92,436.46843 90.60625,437.86218 88.875,437.86218 L 78,437.86218 L 78,448.73718 C 78.000002,450.46843 76.60625,451.86218 74.875,451.86218 L 73.125,451.86218 C 71.39375,451.86218 70,450.46843 70,448.73718 L 70,437.86218 L 59.125,437.86218 C 57.39375,437.86218 56,436.46843 56,434.73718 L 56,432.98718 C 56,431.25593 57.39375,429.86218 59.125,429.86218 L 70,429.86218 L 70,418.98718 C 70,417.25593 71.39375,415.86218 73.125,415.86218 z"
-       id="path5480"
-       sodipodi:nodetypes="cssscccccccccccccccccccccc"
-       inkscape:export-filename="/home/kalle/devel/Sticky/addbutton.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90" />
+       d="M 12 0 C 5.3806251 0 1e-06 5.38063 0 12 C 0 18.61939 5.380624 23.96875 12 23.96875 C 18.619376 23.96875 23.968748 18.61939 23.96875 12 C 23.968749 5.3806199 18.619374 0 12 0 z M 12 4 C 13.108 4.0000002 14 4.892 14 6 L 14 10 L 18 10 C 19.108001 9.9999998 20 10.892 20 12 C 20.000001 13.108 19.108 14 18 14 L 14 14 L 14 18 C 14 19.108 13.108 20 12 20 C 10.892 20 10 19.108 10 18 L 10 14 L 6 14 C 4.892 14 4 13.108 4 12 C 4 10.892 4.892 10 6 10 L 10 10 L 10 6 C 10 4.8920002 10.892 4 12 4 z "
+       transform="translate(50,410.36218)"
+       id="path5480" />
   </g>
 </svg>
