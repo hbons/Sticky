@@ -80,6 +80,7 @@ public class StickyUI {
 		this.background_window.Decorated = false;
 		this.background_window.Maximize(); // Fullscreen() later
 		this.background_window.DeleteEvent += new DeleteEventHandler (Window_Delete);
+		this.background_window.KeyReleaseEvent += new KeyReleaseEventHandler(check_shortcuts);
 
 		this.note_windows = new GLib.List (typeof (NoteWindow));
 
@@ -92,6 +93,17 @@ public class StickyUI {
 		this.grid.Put(add_eventbox, 10, 10);
 		this.background_window.Add(this.grid);
 
+	}
+
+	public void check_shortcuts(object sender, Gtk.KeyReleaseEventArgs args) {
+        Gdk.Key key = args.Event.Key;
+		Console.WriteLine(key);
+		if(key == Gdk.Key.Escape && this.notes_showing) {
+			this.HideNotes();
+		}
+		else if(key == Gdk.Key.q) {
+			Application.Quit ();
+		}
 	}
 
 	public void LoadNotes() {
@@ -171,7 +183,6 @@ public class NoteWindow : Window {
 	}
 
 	public void check_deletion(object sender, Gtk.KeyReleaseEventArgs args) {
-		//FIXME: This is an ugly hack.
         Gdk.Key key = args.Event.Key;
 		if(key == Gdk.Key.BackSpace) {
 			if(this.buffer.Text == "") {
@@ -197,13 +208,24 @@ public class NoteWindow : Window {
 			this.font_size = "14";
 		if (this.buffer.LineCount >= 8) {
 			this.font_size = "12";
-			this.max_lines = 9;}
+			this.max_lines = 9;
+		}
 		if (this.buffer.LineCount >= 9){
 			this.font_size = "11";
-			this.max_lines = 10;}
+			this.max_lines = 10;
+		}
 		if (this.buffer.LineCount >= 10){
 			this.font_size = "10";
-			this.max_lines = 10;}
+			this.max_lines = 11;
+		}
+		if (this.buffer.LineCount >= 11){
+			this.font_size = "9";
+			this.max_lines = 12;
+		}
+		if (this.buffer.LineCount >= 12){
+			this.font_size = "8";
+			this.max_lines = 12;
+		}
 		this.view.ModifyFont(Pango.FontDescription.FromString("Rufscript " + this.font_size));
 	}
 
