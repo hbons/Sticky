@@ -133,6 +133,7 @@ public class NoteWindow : Window {
 	private Gdk.Pixbuf image;
 	public int max_lines;
 	public int max_characters;
+	private bool marked_for_deletion;
 
 	public NoteWindow (NoteData note_data, Window parent) : base ("Note") {
 		this.data = note_data;
@@ -153,6 +154,8 @@ public class NoteWindow : Window {
 		this.view.ModifyBg( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
         this.view.WrapMode = Gtk.WrapMode.WordChar;
 
+		this.view.KeyReleaseEvent += new KeyReleaseEventHandler(this.check_deletion);
+
 		this.buffer = this.view.Buffer;
 		this.buffer.Text = this.data.get_text();
 		this.buffer.Changed += this.text_change;
@@ -160,12 +163,30 @@ public class NoteWindow : Window {
 		this.max_lines = 8;
 		this.max_characters = 7;
 		this.resize_font();
+
+
 		image = new Gdk.Pixbuf( "noise.png" );
 		Add(view);
 	}
 
-	public void resize_font() {
+	public void check_deletion(object sender, System.EventArgs args) {
+		//FIXME: This is an ugly hack. :)
+		if(this.buffer.Text == "") {
+			if(this.marked_for_deletion) {
+				Destroy();
+			}
+			else {
+				this.marked_for_deletion = true;
+			}
+		}
+		else {
+			if(this.marked_for_deletion) {
+				this.marked_for_deletion = false;
+			}
+		}
+	}
 
+	public void resize_font() {
 			this.font_size = "14";
 		if (this.buffer.LineCount >= 8) {
 			this.font_size = "12";
