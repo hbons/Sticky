@@ -88,7 +88,7 @@ public class StickyUI {
 		this.add_eventbox.Add(new Gtk.Image("./note-add.png"));
 		this.add_eventbox.VisibleWindow = false;
 		this.add_eventbox.ButtonPressEvent += new ButtonPressEventHandler (AddNote);
-		this.add_eventbox.EnterNotifyEvent += new EnterNotifyEventHandler (AddNote);
+		//this.add_eventbox.EnterNotifyEvent += new EnterNotifyEventHandler (AddNote);
 		this.grid = new Fixed();
 		this.grid.Put(add_eventbox, 10, 10);
 		this.background_window.Add(this.grid);
@@ -189,7 +189,7 @@ public class NoteWindow : Window {
 		if(key == Gdk.Key.BackSpace) {
 			if(this.buffer.Text == "") {
 				if(this.marked_for_deletion) {
-					Destroy();
+					this.delete_note();
 				}
 				else {
 					this.marked_for_deletion = true;
@@ -270,6 +270,12 @@ public class NoteWindow : Window {
 		NotesDatabase db = new NotesDatabase();
 		db.UpdateNotePosition(this.data);
 	}
+
+	public void delete_note() {
+		NotesDatabase db = new NotesDatabase();
+		db.RemoveNote(this.data);
+		Destroy();
+	}
 }
 
 
@@ -340,7 +346,6 @@ public class NotesDatabase {
 
 	public NotesDatabase() {
 		this.SetupDatabase();
-
 	}
 
 	private void open_connection() {
@@ -417,11 +422,10 @@ public class NotesDatabase {
 		this.close_connection();			
 	}
 
-
 	public int CreateNote() {
 		this.open_connection ();
 
-		this.dbcmd.CommandText = "INSERT INTO notes (text,color,pos_x,pos_y) VALUES ('...','f4ff51',100,100)";
+		this.dbcmd.CommandText = "INSERT INTO notes (text,color,pos_x,pos_y) VALUES ('','f4ff51',100,100)";
 		this.dbcmd.ExecuteNonQuery();
 
 		this.dbcmd.CommandText = "SELECT id FROM notes ORDER BY id DESC";
@@ -431,5 +435,12 @@ public class NotesDatabase {
 
 		this.close_connection();
 		return last_id;
+	}
+
+	public void RemoveNote(NoteData note_data) {
+		this.open_connection ();
+		this.dbcmd.CommandText = "DELETE FROM notes WHERE id = " + note_data.get_id();
+		this.dbcmd.ExecuteNonQuery();
+		this.close_connection();			
 	}
 }
