@@ -122,68 +122,83 @@ public class NoteWindow : Window {
 	private Gtk.TextBuffer buffer;
 	public string font_size;
 	private Gdk.Pixbuf image;
+	public int max_lines;
+	public int max_characters;
 
 	public NoteWindow (NoteData note_data, Window parent) : base ("Note") {
 		this.data = note_data;
 		TransientFor = parent;
 		DestroyWithParent = true;
-		Opacity = 0.75;
-		Resize (250, 200);
+		SetSizeRequest (250, 210);
+		Resizable = false;
 		Move(this.data.get_pos_x(), this.data.get_pos_y());
-		//HasFrame = true;
-		//SetFrameDimensions(12, 12, 12, 12);
 		Decorated = false;
 		SkipPagerHint = true;
 		SkipTaskbarHint = true;
 		BorderWidth = 12;
-		this.view = new Gtk.TextView ();
-		this.buffer = this.view.Buffer;
-		this.buffer.Text = this.data.get_text();
-		ConfigureEvent += this.window_position_changed;
-		this.buffer.Changed += this.text_change;
-		
-        this.view.WrapMode = Gtk.WrapMode.WordChar;
-
-
-		this.font_size = "12";
-		this.resize_font();
-
-        this.view.ModifyBase( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
-		this.view.ModifyBg( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
-
+		ConfigureEvent += window_position_changed;
         ModifyBg( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
 
-		image = new Gdk.Pixbuf( "noise.png" );
+		this.view = new Gtk.TextView ();
+        this.view.ModifyBase( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
+		this.view.ModifyBg( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
+        this.view.WrapMode = Gtk.WrapMode.WordChar;
 
+		this.buffer = this.view.Buffer;
+		this.buffer.Text = this.data.get_text();
+		this.buffer.Changed += this.text_change;
+		this.font_size = "14";
+		this.max_lines = 8;
+		this.max_characters = 7;
+		this.resize_font();
+		image = new Gdk.Pixbuf( "noise.png" );
 		Add(view);
 	}
 
 	public void resize_font() {
-		if (this.buffer.LineCount > 6)
+
+			this.font_size = "14";
+		if (this.buffer.LineCount >= 8) {
+			this.font_size = "12";
+			this.max_lines = 9;}
+		if (this.buffer.LineCount >= 9){
 			this.font_size = "11";
-		if (this.buffer.LineCount > 7)
+			this.max_lines = 10;}
+		if (this.buffer.LineCount >= 10){
 			this.font_size = "10";
-		if (this.buffer.LineCount > 8)
-			this.font_size = "9";
-		if (this.buffer.LineCount > 9)
-			this.font_size = "8";
+			this.max_lines = 10;}
 		this.view.ModifyFont(Pango.FontDescription.FromString("Rufscript " + this.font_size));
 	}
 
 	public void text_change(object sender, System.EventArgs args) {
+
+	/*
+		if(this.buffer.CharCount > this.max_characters) {
+			this.buffer.Text = this.buffer.Text.Substring(1);
+		}
+	*/
+
+		if(this.buffer.LineCount > this.max_lines) {
+			this.buffer.Text = this.buffer.Text.TrimEnd();
+		}
+		
+
 		NotesDatabase db = new NotesDatabase();
 		this.data.set_text (this.buffer.Text);
 		this.resize_font();
 		db.UpdateNoteContent(this.data);
 	}
 
+	/*
 	protected override bool OnExposeEvent (Gdk.EventExpose evnt)
 	{
+		
 		GdkWindow.DrawPixbuf (Style.WhiteGC, image, 0, 0, 0, 0,
 			Allocation.Width, Allocation.Height, Gdk.RgbDither.None, 0, 0);
 		return true;
 	}
-	
+	*/
+
 	[GLib.ConnectBefore]
 	public void window_position_changed(object sender, System.EventArgs args) {
 		int x;
