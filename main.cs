@@ -312,7 +312,7 @@ public class NotesDatabase {
 		catch (SqliteSyntaxException no_table) {
 			this.dbcmd.CommandText = "CREATE TABLE notes (text TEXT, color TEXT, pos_x INTEGER, pos_y INTEGER, id INTEGER PRIMARY KEY AUTOINCREMENT)";
 			this.dbcmd.ExecuteNonQuery();
-			this.dbcmd.CommandText = "INSERT INTO notes(text,color,pos_x,pos_y) VALUES ('Welcome to Sticky! This is your first note. Just click on it to edit it. Do not worry about saving it, it is all automatic.','ffffff',100,100)";
+			this.dbcmd.CommandText = "INSERT INTO notes(text,color,pos_x,pos_y) VALUES ('Welcome to Sticky! This \nis your first note. Just \nclick on it to edit it. \nDo not worry about \nsaving, it is all done \nautomatically.','ffffff',100,100)";
 			this.dbcmd.ExecuteNonQuery();
 			this.close_connection();
 		}
