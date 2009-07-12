@@ -97,7 +97,6 @@ public class StickyUI {
 
 	public void check_shortcuts(object sender, Gtk.KeyReleaseEventArgs args) {
         Gdk.Key key = args.Event.Key;
-		Console.WriteLine(key);
 		if(key == Gdk.Key.Escape && this.notes_showing) {
 			this.HideNotes();
 		}
@@ -123,7 +122,7 @@ public class StickyUI {
 		db = new NotesDatabase();
 		last_id = db.CreateNote();
 
-		new_data = new NoteData("","ffffff",500,500,last_id);
+		new_data = new NoteData("","f4ff51",450,450,last_id);
 		new_window = new NoteWindow(new_data,this.background_window);
 		new_window.ShowAll();
 		this.note_windows.Append(new_window);
@@ -160,12 +159,15 @@ public class NoteWindow : Window {
 		SkipTaskbarHint = true;
 		BorderWidth = 12;
 		ConfigureEvent += window_position_changed;
-        ModifyBg( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
+
+		Gdk.Color note_color = new Gdk.Color();
+		Gdk.Color.Parse(note_data.get_color(), ref note_color);
+
+        ModifyBg( StateType.Normal,note_color);
 
 		this.view = new Gtk.TextView ();
-        this.view.ModifyBase( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
-		this.view.ModifyBg( StateType.Normal, new Gdk.Color (0xf4, 0xff, 0x51) );
         this.view.WrapMode = Gtk.WrapMode.WordChar;
+        this.view.ModifyBase( StateType.Normal,note_color);
 
 		this.view.KeyReleaseEvent += new KeyReleaseEventHandler(this.check_deletion);
 
@@ -288,23 +290,23 @@ public class NoteData {
 	}
 
 	public int get_id() {
-		return id;
+		return this.id;
 	}
 
 	public String get_text() {
-		return text;
+		return this.text;
 	}
 
 	public String get_color() {
-		return color;
+		return "#"+this.color;
 	}
 
 	public int get_pos_x() {
-		return pos_x;
+		return this.pos_x;
 	}
 
 	public int get_pos_y() {
-		return pos_y;
+		return this.pos_y;
 	}
 
 	public void set_id(int id) {
@@ -364,7 +366,9 @@ public class NotesDatabase {
 		catch (SqliteSyntaxException no_table) {
 			this.dbcmd.CommandText = "CREATE TABLE notes (text TEXT, color TEXT, pos_x INTEGER, pos_y INTEGER, id INTEGER PRIMARY KEY AUTOINCREMENT)";
 			this.dbcmd.ExecuteNonQuery();
-			this.dbcmd.CommandText = "INSERT INTO notes(text,color,pos_x,pos_y) VALUES ('Welcome to Sticky! This \nis your first note. Just \nclick on it to edit it. \nDo not worry about \nsaving, it is all done \nautomatically.','ffffff',100,100)";
+			this.dbcmd.CommandText = "INSERT INTO notes(text,color,pos_x,pos_y) VALUES ('Welcome to Sticky! This \nis your first note. Just \nclick on it to edit it. \nDo not worry about \nsaving, it is all done \nautomatically.','f4ff51',100,100)";
+			this.dbcmd.ExecuteNonQuery();
+			this.dbcmd.CommandText = "INSERT INTO notes(text,color,pos_x,pos_y) VALUES ('Remember: If you want to delete a note, just erase all the content in it.','88dcd5',250,250)";
 			this.dbcmd.ExecuteNonQuery();
 			this.close_connection();
 		}
@@ -417,7 +421,7 @@ public class NotesDatabase {
 	public int CreateNote() {
 		this.open_connection ();
 
-		this.dbcmd.CommandText = "INSERT INTO notes (text,color,pos_x,pos_y) VALUES ('...','ffffff',100,100)";
+		this.dbcmd.CommandText = "INSERT INTO notes (text,color,pos_x,pos_y) VALUES ('...','f4ff51',100,100)";
 		this.dbcmd.ExecuteNonQuery();
 
 		this.dbcmd.CommandText = "SELECT id FROM notes ORDER BY id DESC";
