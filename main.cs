@@ -61,6 +61,8 @@ public class StickyUI {
 		foreach(NoteWindow x in this.note_windows) {
 			x.ShowAll();
 		}
+		//WORKAROUND: Must be set every time we show notes to stay opaque.
+		this.background_window.Opacity = 0.75;
 	}
 
 	public void HideNotes() {
@@ -73,7 +75,7 @@ public class StickyUI {
 
 	public void SetupWindow() {
 		this.background_window = new Window("Sticky");
-		this.background_window.Opacity = 0.75;
+
         this.background_window.ModifyBg( StateType.Normal, new Gdk.Color (0, 0, 0) );
 		this.background_window.Decorated = false;
 		this.background_window.Maximize(); // Fullscreen() later

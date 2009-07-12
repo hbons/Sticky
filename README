@@ -8,8 +8,11 @@ To run Sticky, run the file "run.sh".
 
 FONT:
 Make sure you have the Rufscript font for prettier notes (Sticky will default to the Sans font otherwise).
-Avalible from the Ubuntu repos or download from:
-http://hiran.in/content/fonts/rufscript/Rufscript010.ttf
 
-Put it in /usr/share/fonts/ to make all users be able to use it
-or ~/.fonts/ if you want it installed just for your user.
+* On Ubuntu:
+sudo apt-get install ttf-rufscript
+
+* On other distros:
+mkdir ~/.fonts
+cd ~/.fonts
+wget http://hiran.in/content/fonts/rufscript/Rufscript010.ttf
