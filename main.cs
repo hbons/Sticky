@@ -211,7 +211,7 @@ public class NoteWindow : Window {
 		if(key == Gdk.Key.BackSpace) {
 			if(this.buffer.Text == "") {
 				if(this.marked_for_deletion) {
-					this.delete_note();
+					this.remove(); // Remove the window
 				}
 				else {
 					this.marked_for_deletion = true;
@@ -289,10 +289,9 @@ public class NoteWindow : Window {
 		this.data.save();
 	}
 
-	public void delete_note() {
-		NotesDatabase db = new NotesDatabase();
-		db.RemoveNote(this.data);
-		Destroy();
+	public void remove() {
+		this.data.remove();
+		Destroy(); // destroy the window. TODO: NoteData is still in memory until next launch, needs to be removed.
 	}
 }
 
@@ -363,6 +362,11 @@ public class NoteData {
 								  ", pos_y = " + this.get_pos_y() + " " + 
 							   	  "WHERE id = " + this.get_id()
 								 );
+	}
+
+	public void remove() {
+		NotesDatabase database = new NotesDatabase();
+		database.query_no_results("DELETE FROM notes WHERE id = " + this.get_id());		
 	}
 
 }
@@ -455,12 +459,7 @@ public class NotesDatabase {
 		return last_id;
 	}
 
-	public void RemoveNote(NoteData note_data) {
-		this.open_connection ();
-		this.dbcmd.CommandText = "DELETE FROM notes WHERE id = " + note_data.get_id();
-		this.dbcmd.ExecuteNonQuery();
-		this.close_connection();			
-	}
+
 
 	public void query_no_results (String query) {
 		this.open_connection ();
