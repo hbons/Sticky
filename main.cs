@@ -1,5 +1,5 @@
 // License GNU GPL v3
-// (C) Kalle Persson, Hylke Bons, Jakub Steiner
+// (c) 2009 Kalle Persson, Hylke Bons, Jakub Steiner
 //
 //
 
@@ -9,7 +9,6 @@ using Mono.Data.SqliteClient;
 using Gtk;
 using GLib;
 
- 
 public class Sticky {
 
 	public static void Main(String[] args) {
@@ -137,12 +136,12 @@ public class StickyUI {
 		GLib.List colors = new GLib.List (typeof (string));
 		Random random = new Random();
 
-		colors.Append("f4ff51");
-		colors.Append("f7ba5f");
-		colors.Append("88dcd5");
-		colors.Append("b3f75f");
-		colors.Append("f75f77");
-		colors.Append("dc5ff7");
+		colors.Append("#f4ff51");
+		colors.Append("#f7ba5f");
+		colors.Append("#88dcd5");
+		colors.Append("#b3f75f");
+		colors.Append("#f75f77");
+		colors.Append("#dc5ff7");
 
 		result = random.Next(colors.Count);
 		color = ""+colors[result];
@@ -374,8 +373,8 @@ public class NoteData {
 
 public class NotesDatabase {
 
-	public IDbConnection dbcon;
-	public IDbCommand dbcmd;
+	private IDbConnection dbcon;
+	private IDbCommand dbcmd;
 
 	public NotesDatabase() {
 		this.SetupDatabase();
