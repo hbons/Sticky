@@ -194,7 +194,7 @@ public class NoteWindow : Window {
 		this.resize_font();
 
 
-		image = new Gdk.Pixbuf( "noise.png" );
+		//image = new Gdk.Pixbuf( "noise.png" );
 		Add(view);
 	}
 
@@ -246,14 +246,7 @@ public class NoteWindow : Window {
 	}
 
 	public void text_change(object sender, System.EventArgs args) {
-
-	/*
-		if(this.buffer.CharCount > this.max_characters) {
-			this.buffer.Text = this.buffer.Text.Substring(1);
-		}
-	*/
-
-		if(this.buffer.LineCount > this.max_lines) {
+		if (this.buffer.LineCount > this.max_lines) {
 			this.buffer.Text = this.buffer.Text.TrimEnd();
 		}
 		this.resize_font();
@@ -296,7 +289,7 @@ public class NoteData {
 	private int pos_x;
 	private int pos_y;
 
-	public NoteData(String text, String color, int pos_x, int pos_y,int id) {
+	public NoteData(String text, String color, int pos_x, int pos_y, int id) {
 		this.id = id;
 		this.text = text;
 		this.color = color;
@@ -304,49 +297,49 @@ public class NoteData {
 		this.pos_y = pos_y;
 	}
 
-	public int get_id() {
+	public int get_id () {
 		return this.id;
 	}
 
-	public String get_text() {
+	public String get_text () {
 		return this.text;
 	}
 
-	public String get_color() {
+	public String get_color () {
 		return this.color;
 	}
 
-	public int get_pos_x() {
+	public int get_pos_x () {
 		return this.pos_x;
 	}
 
-	public int get_pos_y() {
+	public int get_pos_y () {
 		return this.pos_y;
 	}
 
-	public void set_id(int id) {
+	public void set_id (int id) {
 		this.id = id;
 	}
 
-	public void set_text(String text) {
+	public void set_text (String text) {
 		text = text.Replace('"', '\"');
 		text = text.Replace("'", "`"); // Dirty hack
 		this.text = text;
 	}
 
-	public void set_color(String color) {
+	public void set_color (String color) {
 		this.color = color;
 	}
 
-	public void set_pos_x(int pos_x) {
+	public void set_pos_x (int pos_x) {
 		this.pos_x = pos_x;
 	}
 
-	public void set_pos_y(int pos_y) {
+	public void set_pos_y (int pos_y) {
 		this.pos_y = pos_y;
 	}
 
-	public void save() {
+	public void save () {
 		NotesDatabase database = new NotesDatabase();
 		database.query_no_results("UPDATE notes SET text = '" + this.get_text() + "', " + 
 					    		  "color = '" + this.get_color() + "'" +  
@@ -356,7 +349,7 @@ public class NoteData {
 								 );
 	}
 
-	public void remove() {
+	public void remove () {
 		NotesDatabase database = new NotesDatabase();
 		database.query_no_results("DELETE FROM notes WHERE id = " + this.get_id());		
 	}
@@ -370,7 +363,29 @@ public class NotesDatabase {
 	private IDbCommand dbcmd;
 
 	public NotesDatabase() {
-		this.SetupDatabase();
+
+		// Create a database if none exists.
+		try {
+			query_no_results("SELECT * FROM notes");
+		}
+		catch (SqliteSyntaxException no_table) {
+
+			query_no_results("CREATE TABLE notes ( " +
+							"text TEXT, color TEXT, " + 
+							"pos_x INTEGER, pos_y INTEGER, " +
+							"id INTEGER PRIMARY KEY AUTOINCREMENT )");
+
+			query_no_results("INSERT INTO notes " + 
+							 "(text, color, pos_x, pos_y) VALUES " + 
+							 "('Welcome to Sticky! This \nis your first note. Just \nclick on it to edit it.\n" + 
+							 "Do not worry about \nsaving, it is all done \nautomatically.', '#f4ff51', 100, 100)");
+
+			query_no_results("INSERT INTO notes " + 
+							 "(text, color, pos_x, pos_y) VALUES " + 
+							 "('Remove all text in a note to delete it.', '#f4ff51', 250, 250)");
+
+		}
+
 	}
 
 	private void open_connection() {
@@ -387,22 +402,7 @@ public class NotesDatabase {
 		this.dbcon = null;		 
 	}
 
-	private void SetupDatabase() {
-		this.open_connection ();
-		try {
-			this.dbcmd.CommandText = "SELECT * FROM notes";
-			this.dbcmd.ExecuteNonQuery();
-		}
-		catch (SqliteSyntaxException no_table) {
-			this.dbcmd.CommandText = "CREATE TABLE notes (text TEXT, color TEXT, pos_x INTEGER, pos_y INTEGER, id INTEGER PRIMARY KEY AUTOINCREMENT)";
-			this.dbcmd.ExecuteNonQuery();
-			this.dbcmd.CommandText = "INSERT INTO notes(text,color,pos_x,pos_y) VALUES ('Welcome to Sticky! This \nis your first note. Just \nclick on it to edit it. \nDo not worry about \nsaving, it is all done \nautomatically.','f4ff51',100,100)";
-			this.dbcmd.ExecuteNonQuery();
-			this.dbcmd.CommandText = "INSERT INTO notes(text,color,pos_x,pos_y) VALUES ('Remember: If you want to delete a note, just erase all the content in it.','88dcd5',250,250)";
-			this.dbcmd.ExecuteNonQuery();
-			this.close_connection();
-		}
-	}
+
 
 	public NoteData[] fetch_notes() {
 		this.open_connection();
