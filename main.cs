@@ -119,7 +119,7 @@ public class StickyUI {
 		NotesDatabase db;
 		string note_color;
 
-		note_color = this.RandomColor();
+		note_color = RandomColor();
 
 		db = new NotesDatabase();
 		last_id = db.CreateNote();
@@ -130,7 +130,7 @@ public class StickyUI {
 		this.note_windows.Append(new_window);
 	}
 
-	public string RandomColor() {
+	public static string RandomColor() {
 		GLib.List colors = new GLib.List (typeof (string));
 		colors.Append("#f4ff51");
 		colors.Append("#f7ba5f");
