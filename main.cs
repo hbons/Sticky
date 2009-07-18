@@ -10,14 +10,19 @@ using Mono.Data.SqliteClient;
 public class Sticky {
 
 	public static void Main(String[] args) {
+
 		Application.Init();
 		StickyUI UI = new StickyUI();
+
 		if(args.Length > 0 && args[0] == "-h")
 			UI.HideNotes();
 		else
 			UI.ShowNotes();
+
 		Application.Run();
+
 	}
+
 }
 
 public class StickyUI {
@@ -109,27 +114,20 @@ public class StickyUI {
 	}
 
 	public void AddNote(object obj, EventArgs args){
-		int last_id;
-		NoteData new_data;
-		NoteWindow new_window;
-		NotesDatabase db;
-		string note_color;
 
-		note_color = RandomColor();
+		NotesDatabase database = new NotesDatabase();
+		database.QueryNoResults("INSERT INTO notes (text, color, pos_x, pos_y) VALUES ('', '#ffffff', 100, 100)");
 
-		db = new NotesDatabase();
-		last_id = db.CreateNote();
-
-		new_data = new NoteData("",note_color,450,450,last_id);
-		new_window = new NoteWindow(new_data,this.background_window);
+		NoteData new_note_data = new NoteData("", RandomColor(), 450, 450, database.get_last_id());
+		NoteWindow new_window = new NoteWindow(new_note_data, this.background_window);
 		new_window.ShowAll();
 		this.note_windows.Append(new_window);
+
 	}
 
 	public static string RandomColor() {
 		GLib.List colors = new GLib.List (typeof (string));
 		colors.Append("#f4ff51");
-		colors.Append("#f7ba5f");
 		colors.Append("#88dcd5");
 		colors.Append("#b3f75f");
 		colors.Append("#f75f77");
@@ -379,14 +377,14 @@ public class NotesDatabase {
 
 	}
 
-	private void OpenConnection() {
+	public void OpenConnection() {
 		string connection_string = "URI=file:notes.db,version=3";
 		this.dbcon = (IDbConnection) new SqliteConnection(connection_string);
 		this.dbcon.Open();
 		this.dbcmd = dbcon.CreateCommand();		 
 	}
 
-	private void CloseConnection() {
+	public void CloseConnection() {
 		dbcmd.Dispose();
 		dbcmd = null;
 		this.dbcon.Close();
@@ -422,23 +420,20 @@ public class NotesDatabase {
 		return arr;
 	}
 	
-	public int CreateNote() {
-
-		this.QueryNoResults("INSERT INTO notes (text,color,pos_x,pos_y) VALUES ('', '#ffffff', 100, 100)");
-
-		this.OpenConnection ();
-		this.dbcmd.CommandText = "SELECT id FROM notes ORDER BY id DESC";
-		IDataReader last_id_reader = dbcmd.ExecuteReader();
-		last_id_reader.Read();
-		int last_id = int.Parse(last_id_reader.GetString (0));
-		this.CloseConnection();
-		return last_id;
-	}
-
 	public void QueryNoResults (String query) {
 		this.OpenConnection ();
 		this.dbcmd.CommandText = query;
 		this.dbcmd.ExecuteNonQuery();
 		this.CloseConnection();
 	}
+
+	public int get_last_id () {
+		this.OpenConnection ();
+		this.dbcmd.CommandText = "SELECT id FROM notes ORDER BY id DESC LIMIT 1";
+		IDataReader reader = this.dbcmd.ExecuteReader();
+		reader.Read();
+		this.CloseConnection();
+		return int.Parse(reader.GetString (0));
+	}
+
 }
