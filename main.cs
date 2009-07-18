@@ -1,13 +1,11 @@
-// License GNU GPL v3
-// (c) 2009 Kalle Persson, Hylke Bons, Jakub Steiner
-//
-//
+// License: GNU GPLv3
+// (c) 2009, Kalle Persson, Hylke Bons, Jakub Steiner
 
 using System;
 using System.Data;
-using Mono.Data.SqliteClient;
-using Gtk;
 using GLib;
+using Gtk;
+using Mono.Data.SqliteClient;
 
 public class Sticky {
 
@@ -65,11 +63,11 @@ public class StickyUI {
 	}
 
 	public void HideNotes() {
-		this.notes_showing = false;
-		foreach(NoteWindow x in this.note_windows) {
-			x.Hide();
-			this.background_window.HideAll();
+		foreach(NoteWindow note_window in this.note_windows) {
+			note_window.Hide();
 		}
+		this.background_window.HideAll();
+		this.notes_showing = false;
 	}
 
 	public void SetupWindow() {
