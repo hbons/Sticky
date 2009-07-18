@@ -430,7 +430,6 @@ public class NotesDatabase {
 		this.dbcmd.CommandText = "SELECT id FROM notes ORDER BY id DESC LIMIT 1";
 		IDataReader reader = this.dbcmd.ExecuteReader();
 		reader.Read();
-		reader = null;
 		this.CloseConnection();
 		return int.Parse(reader.GetString (0));
 	}
