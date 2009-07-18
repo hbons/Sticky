@@ -118,14 +118,36 @@ public class StickyUI {
 		NoteData new_data;
 		NoteWindow new_window;
 		NotesDatabase db;
+		string note_color;
+
+		note_color = this.RandomColor();
 
 		db = new NotesDatabase();
 		last_id = db.CreateNote();
 
-		new_data = new NoteData("","f4ff51",450,450,last_id);
+		new_data = new NoteData("",note_color,450,450,last_id);
 		new_window = new NoteWindow(new_data,this.background_window);
 		new_window.ShowAll();
 		this.note_windows.Append(new_window);
+	}
+
+	public string RandomColor() {
+		string color;
+		int result;
+		GLib.List colors = new GLib.List (typeof (string));
+		Random random = new Random();
+
+		colors.Append("f4ff51");
+		colors.Append("f7ba5f");
+		colors.Append("88dcd5");
+		colors.Append("b3f75f");
+		colors.Append("f75f77");
+		colors.Append("dc5ff7");
+
+		result = random.Next(colors.Count);
+		color = ""+colors[result];
+		Console.WriteLine(color);
+		return color;
 	}
 
 	static void Window_Delete (object obj, DeleteEventArgs args)
@@ -163,7 +185,7 @@ public class NoteWindow : Window {
 		Gdk.Color note_color = new Gdk.Color();
 		Gdk.Color.Parse(note_data.get_color(), ref note_color);
 
-        ModifyBg( StateType.Normal,note_color);
+        ModifyBg(StateType.Normal,note_color);
 
 		this.view = new Gtk.TextView ();
         this.view.WrapMode = Gtk.WrapMode.WordChar;
@@ -242,12 +264,9 @@ public class NoteWindow : Window {
 		if(this.buffer.LineCount > this.max_lines) {
 			this.buffer.Text = this.buffer.Text.TrimEnd();
 		}
-		
-
-		NotesDatabase db = new NotesDatabase();
-		this.data.set_text (this.buffer.Text);
 		this.resize_font();
-		db.UpdateNoteContent(this.data);
+		this.data.set_text (this.buffer.Text);
+		this.data.save();
 	}
 
 	/*
@@ -267,8 +286,7 @@ public class NoteWindow : Window {
 		GetPosition(out x, out y);
 		this.data.set_pos_x (x);
 		this.data.set_pos_y (y);
-		NotesDatabase db = new NotesDatabase();
-		db.UpdateNotePosition(this.data);
+		this.data.save();
 	}
 
 	public void delete_note() {
@@ -336,6 +354,17 @@ public class NoteData {
 	public void set_pos_y(int pos_y) {
 		this.pos_y = pos_y;
 	}
+
+	public void save() {
+		NotesDatabase database = new NotesDatabase();
+		database.query_no_results("UPDATE notes SET text = '" + this.get_text() + "', " + 
+					    		  "color = '" + this.get_color() + "'" +  
+								  ", pos_x = " + this.get_pos_x() + " " + 
+								  ", pos_y = " + this.get_pos_y() + " " + 
+							   	  "WHERE id = " + this.get_id()
+								 );
+	}
+
 }
 
 
@@ -408,24 +437,13 @@ public class NotesDatabase {
 		return arr;
 	}
 
-	public void UpdateNoteContent(NoteData note_data) {
-		this.open_connection ();
-		this.dbcmd.CommandText = "UPDATE notes SET text = '" + note_data.get_text() + "' WHERE id = " + note_data.get_id();
-		this.dbcmd.ExecuteNonQuery();
-		this.close_connection();			
-	}
-
-	public void UpdateNotePosition(NoteData note_data) {
-		this.open_connection ();
-		this.dbcmd.CommandText = "UPDATE notes SET pos_x = " + note_data.get_pos_x() + ", pos_y = " + note_data.get_pos_y() + " WHERE id = " + note_data.get_id();
-		this.dbcmd.ExecuteNonQuery();
-		this.close_connection();			
-	}
-
+	
 	public int CreateNote() {
 		this.open_connection ();
 
-		this.dbcmd.CommandText = "INSERT INTO notes (text,color,pos_x,pos_y) VALUES ('','f4ff51',100,100)";
+		string color;
+
+		this.dbcmd.CommandText = "INSERT INTO notes (text,color,pos_x,pos_y) VALUES ('','ffffff',100,100)";
 		this.dbcmd.ExecuteNonQuery();
 
 		this.dbcmd.CommandText = "SELECT id FROM notes ORDER BY id DESC";
@@ -442,5 +460,12 @@ public class NotesDatabase {
 		this.dbcmd.CommandText = "DELETE FROM notes WHERE id = " + note_data.get_id();
 		this.dbcmd.ExecuteNonQuery();
 		this.close_connection();			
+	}
+
+	public void query_no_results (String query) {
+		this.open_connection ();
+		this.dbcmd.CommandText = query;
+		this.dbcmd.ExecuteNonQuery();
+		this.close_connection();
 	}
 }
