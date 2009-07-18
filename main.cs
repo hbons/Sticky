@@ -10,12 +10,12 @@ using Mono.Data.SqliteClient;
 public class Sticky {
 
 	public static void Main(String[] args) {
-		bool hide = false;
-		if(args.Length > 0 && args[0] == "-h") {
-			hide = true;
-		}
 		Application.Init();
-		StickyUI UI = new StickyUI(hide);
+		StickyUI UI = new StickyUI();
+		if(args.Length > 0 && args[0] == "-h")
+			UI.HideNotes();
+		else
+			UI.ShowNotes();
 		Application.Run();
 	}
 }
@@ -32,15 +32,12 @@ public class StickyUI {
 	public NoteData[] notes;
 	GLib.List note_windows;
 	
-	public StickyUI(bool auto_hide) {
+	public StickyUI() {
 		this.SetupWindow();
 		this.LoadNotes();
-		this.status_icon = StatusIcon.NewFromIconName("tomboy");
-		this.status_icon.Activate += new EventHandler(this.ToggleNotes);
-		if(!auto_hide) {		
-			this.notes_showing = true;
-			this.ShowNotes();
-		}
+		this.status_icon = StatusIcon.NewFromIconName("gnome-sticky-notes-applet");
+		this.status_icon.Activate += new EventHandler(this.ToggleNotes);	
+		this.notes_showing = true;
 	}
 
 	public void ToggleNotes(object obj, EventArgs args) {
@@ -53,11 +50,11 @@ public class StickyUI {
 	}
 
 	public void ShowNotes() {
-		this.notes_showing = true;
 		this.background_window.ShowAll(); 
-		foreach(NoteWindow x in this.note_windows) {
-			x.ShowAll();
+		foreach(NoteWindow note_window in this.note_windows) {
+			note_window.ShowAll();
 		}
+		this.notes_showing = true;
 		//WORKAROUND: Must be set every time we show notes to stay opaque.
 		this.background_window.Opacity = 0.75;
 	}
@@ -75,6 +72,7 @@ public class StickyUI {
 
         this.background_window.ModifyBg( StateType.Normal, new Gdk.Color (0, 0, 0) );
 		this.background_window.Decorated = false;
+		this.background_window.Opacity = 0.6;
 		this.background_window.Maximize(); // Fullscreen() later
 		this.background_window.DeleteEvent += new DeleteEventHandler (Window_Delete);
 		this.background_window.KeyReleaseEvent += new KeyReleaseEventHandler(check_shortcuts);
@@ -154,7 +152,7 @@ public class NoteWindow : Window {
 	private Gtk.TextView view;
 	private Gtk.TextBuffer buffer;
 	public string font_size;
-	private Gdk.Pixbuf image;
+//	private Gdk.Pixbuf image;
 	public int max_lines;
 	public int max_characters;
 	private bool marked_for_deletion;
@@ -191,7 +189,6 @@ public class NoteWindow : Window {
 		this.max_characters = 7;
 		this.resize_font();
 
-
 		//image = new Gdk.Pixbuf( "noise.png" );
 		Add(view);
 	}
@@ -199,18 +196,15 @@ public class NoteWindow : Window {
 	public void check_deletion(object sender, Gtk.KeyReleaseEventArgs args) {
         Gdk.Key key = args.Event.Key;
 		if(key == Gdk.Key.BackSpace) {
-			if(this.buffer.Text == "") {
-				if(this.marked_for_deletion) {
+
+			if (this.buffer.Text == "") {
+				if (this.marked_for_deletion)
 					this.remove(); // Remove the window
-				}
-				else {
+				else
 					this.marked_for_deletion = true;
-				}
-			}
-			else {
-				if(this.marked_for_deletion) {
+			} else {
+				if (this.marked_for_deletion)
 					this.marked_for_deletion = false;
-				}
 			}
 		}
 		else if(key != Gdk.Key.BackSpace && this.marked_for_deletion) {
@@ -339,7 +333,7 @@ public class NoteData {
 
 	public void save () {
 		NotesDatabase database = new NotesDatabase();
-		database.query_no_results("UPDATE notes SET text = '" + this.get_text() + "', " + 
+		database.QueryNoResults("UPDATE notes SET text = '" + this.get_text() + "', " + 
 					    		  "color = '" + this.get_color() + "'" +  
 								  ", pos_x = " + this.get_pos_x() + " " + 
 								  ", pos_y = " + this.get_pos_y() + " " + 
@@ -349,11 +343,10 @@ public class NoteData {
 
 	public void remove () {
 		NotesDatabase database = new NotesDatabase();
-		database.query_no_results("DELETE FROM notes WHERE id = " + this.get_id());		
+		database.QueryNoResults("DELETE FROM notes WHERE id = " + this.get_id());		
 	}
 
 }
-
 
 public class NotesDatabase {
 
@@ -364,21 +357,21 @@ public class NotesDatabase {
 
 		// Create a database if none exists.
 		try {
-			query_no_results("SELECT * FROM notes");
+			QueryNoResults("SELECT * FROM notes");
 		}
-		catch (SqliteSyntaxException no_table) {
+		catch (SqliteSyntaxException) {
 
-			query_no_results("CREATE TABLE notes ( " +
+			QueryNoResults("CREATE TABLE notes ( " +
 							"text TEXT, color TEXT, " + 
 							"pos_x INTEGER, pos_y INTEGER, " +
 							"id INTEGER PRIMARY KEY AUTOINCREMENT )");
 
-			query_no_results("INSERT INTO notes " + 
+			QueryNoResults("INSERT INTO notes " + 
 							 "(text, color, pos_x, pos_y) VALUES " + 
 							 "('Welcome to Sticky! This \nis your first note. Just \nclick on it to edit it.\n" + 
 							 "Do not worry about \nsaving, it is all done \nautomatically.', '#f4ff51', 100, 100)");
 
-			query_no_results("INSERT INTO notes " + 
+			QueryNoResults("INSERT INTO notes " + 
 							 "(text, color, pos_x, pos_y) VALUES " + 
 							 "('Remove all text in a note to delete it.', '#f4ff51', 250, 250)");
 
@@ -386,24 +379,22 @@ public class NotesDatabase {
 
 	}
 
-	private void open_connection() {
+	private void OpenConnection() {
 		string connection_string = "URI=file:notes.db,version=3";
 		this.dbcon = (IDbConnection) new SqliteConnection(connection_string);
 		this.dbcon.Open();
 		this.dbcmd = dbcon.CreateCommand();		 
 	}
 
-	private void close_connection() {
+	private void CloseConnection() {
 		dbcmd.Dispose();
 		dbcmd = null;
 		this.dbcon.Close();
 		this.dbcon = null;		 
 	}
 
-
-
 	public NoteData[] fetch_notes() {
-		this.open_connection();
+		this.OpenConnection();
 		this.dbcmd.CommandText = "SELECT COUNT(id) FROM notes";
 		IDataReader count_reader = dbcmd.ExecuteReader();
 		count_reader.Read();
@@ -427,34 +418,27 @@ public class NotesDatabase {
 
 		note_reader.Close();
 		note_reader = null;
-		this.close_connection();
+		this.CloseConnection();
 		return arr;
 	}
-
 	
 	public int CreateNote() {
-		this.open_connection ();
 
-		string color;
+		this.QueryNoResults("INSERT INTO notes (text,color,pos_x,pos_y) VALUES ('', '#ffffff', 100, 100)");
 
-		this.dbcmd.CommandText = "INSERT INTO notes (text,color,pos_x,pos_y) VALUES ('','ffffff',100,100)";
-		this.dbcmd.ExecuteNonQuery();
-
+		this.OpenConnection ();
 		this.dbcmd.CommandText = "SELECT id FROM notes ORDER BY id DESC";
 		IDataReader last_id_reader = dbcmd.ExecuteReader();
 		last_id_reader.Read();
 		int last_id = int.Parse(last_id_reader.GetString (0));
-
-		this.close_connection();
+		this.CloseConnection();
 		return last_id;
 	}
 
-
-
-	public void query_no_results (String query) {
-		this.open_connection ();
+	public void QueryNoResults (String query) {
+		this.OpenConnection ();
 		this.dbcmd.CommandText = query;
 		this.dbcmd.ExecuteNonQuery();
-		this.close_connection();
+		this.CloseConnection();
 	}
 }
