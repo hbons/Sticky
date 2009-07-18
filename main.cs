@@ -1,5 +1,5 @@
-// License: GNU GPLv3
 // (c) 2009, Kalle Persson, Hylke Bons, Jakub Steiner
+// License: GNU GPLv3
 
 using System;
 using System.Data;
@@ -14,7 +14,7 @@ public class Sticky {
 		Application.Init();
 		StickyUI UI = new StickyUI();
 
-		if(args.Length > 0 && args[0] == "-h")
+		if (args.Length > 0 && args[0] == "-h")
 			UI.HideNotes();
 		else
 			UI.ShowNotes();
@@ -32,10 +32,11 @@ public class StickyUI {
 	public Window background_window;
 	public EventBox add_eventbox;
 	public Fixed grid;
+
 	public NotesDatabase db;
 
 	public NoteData[] notes;
-	GLib.List note_windows;
+	public GLib.List note_windows;
 	
 	public StickyUI() {
 		this.SetupWindow();
@@ -46,10 +47,9 @@ public class StickyUI {
 	}
 
 	public void ToggleNotes(object obj, EventArgs args) {
-		if(!this.notes_showing) {
+		if (!this.notes_showing) {
 			this.ShowNotes();
-		}
-		else {
+		} else {
 			this.HideNotes();
 		} 			
 	}
@@ -73,12 +73,13 @@ public class StickyUI {
 	}
 
 	public void SetupWindow() {
-		this.background_window = new Window("Sticky");
 
+		this.background_window = new Window("Sticky");
         this.background_window.ModifyBg( StateType.Normal, new Gdk.Color (0, 0, 0) );
 		this.background_window.Decorated = false;
 		this.background_window.Opacity = 0.6;
 		this.background_window.Maximize(); // Fullscreen() later
+
 		this.background_window.DeleteEvent += new DeleteEventHandler (Window_Delete);
 		this.background_window.KeyReleaseEvent += new KeyReleaseEventHandler(check_shortcuts);
 
@@ -96,21 +97,23 @@ public class StickyUI {
 	}
 
 	public void check_shortcuts(object sender, Gtk.KeyReleaseEventArgs args) {
-        Gdk.Key key = args.Event.Key;
-		if(key == Gdk.Key.Escape && this.notes_showing) {
+
+		Gdk.Key key = args.Event.Key;
+		if (key == Gdk.Key.Escape && this.notes_showing)
 			this.HideNotes();
-		}
-		else if(key == Gdk.Key.q) {
+		else if (key == Gdk.Key.q)
 			Application.Quit ();
-		}
+
 	}
 
 	public void LoadNotes() {
+
 		this.db = new NotesDatabase();
-		this.notes = db.fetch_notes();
+		this.notes = db.FetchNotes();
 		foreach(NoteData x in this.notes) {
 			this.note_windows.Append(new NoteWindow(x,background_window));
 		}
+
 	}
 
 	public void AddNote(object obj, EventArgs args){
@@ -118,14 +121,14 @@ public class StickyUI {
 		NotesDatabase database = new NotesDatabase();
 		database.QueryNoResults("INSERT INTO notes (text, color, pos_x, pos_y) VALUES ('', '#ffffff', 100, 100)");
 
-		NoteData new_note_data = new NoteData("", RandomColor(), 450, 450, database.get_last_id());
+		NoteData new_note_data = new NoteData("", RandomNoteColor(), 450, 450, database.get_last_id());
 		NoteWindow new_window = new NoteWindow(new_note_data, this.background_window);
 		new_window.ShowAll();
 		this.note_windows.Append(new_window);
 
 	}
 
-	public static string RandomColor() {
+	public static string RandomNoteColor() {
 		GLib.List colors = new GLib.List (typeof (string));
 		colors.Append("#f4ff51");
 		colors.Append("#88dcd5");
@@ -133,7 +136,7 @@ public class StickyUI {
 		colors.Append("#f75f77");
 		colors.Append("#dc5ff7");
 		Random random = new Random();
-		return (string)colors[random.Next(colors.Count)];
+		return (string) colors[random.Next(colors.Count)];
 	}
 
 	static void Window_Delete (object obj, DeleteEventArgs args)
@@ -152,7 +155,6 @@ public class NoteWindow : Window {
 	public string font_size;
 //	private Gdk.Pixbuf image;
 	public int max_lines;
-	public int max_characters;
 	private bool marked_for_deletion;
 
 	public NoteWindow (NoteData note_data, Window parent) : base ("Note") {
@@ -184,7 +186,6 @@ public class NoteWindow : Window {
 		this.buffer.Changed += this.text_change;
 		this.font_size = "14";
 		this.max_lines = 8;
-		this.max_characters = 7;
 		this.resize_font();
 
 		//image = new Gdk.Pixbuf( "noise.png" );
@@ -193,7 +194,7 @@ public class NoteWindow : Window {
 
 	public void check_deletion(object sender, Gtk.KeyReleaseEventArgs args) {
         Gdk.Key key = args.Event.Key;
-		if(key == Gdk.Key.BackSpace) {
+		if (key == Gdk.Key.BackSpace) {
 
 			if (this.buffer.Text == "") {
 				if (this.marked_for_deletion)
@@ -204,14 +205,15 @@ public class NoteWindow : Window {
 				if (this.marked_for_deletion)
 					this.marked_for_deletion = false;
 			}
-		}
-		else if(key != Gdk.Key.BackSpace && this.marked_for_deletion) {
+
+		} else if (key != Gdk.Key.BackSpace && this.marked_for_deletion)
 			this.marked_for_deletion = false;
-		}
+
 	}
 
 	public void resize_font() {
-			this.font_size = "14";
+
+		this.font_size = "14";
 		if (this.buffer.LineCount >= 8) {
 			this.font_size = "12";
 			this.max_lines = 9;
@@ -256,35 +258,34 @@ public class NoteWindow : Window {
 
 	[GLib.ConnectBefore]
 	public void window_position_changed(object sender, System.EventArgs args) {
-		int x;
-		int y;
-		GetPosition(out x, out y);
+		int x, y;
+		GetPosition (out x, out y);
 		this.data.set_pos_x (x);
 		this.data.set_pos_y (y);
-		this.data.save();
+		this.data.save ();
 	}
 
 	public void remove() {
 		this.data.remove();
-		Destroy(); // destroy the window. TODO: NoteData is still in memory until next launch, needs to be removed.
+		Destroy();
 	}
 }
 
 
 public class NoteData {
 
-	private int id;
 	private String text;
 	private String color;
 	private int pos_x;
 	private int pos_y;
+	private int id;
 
 	public NoteData(String text, String color, int pos_x, int pos_y, int id) {
-		this.id = id;
 		this.text = text;
 		this.color = color;
 		this.pos_x = pos_x;
 		this.pos_y = pos_y;
+		this.id = id;
 	}
 
 	public int get_id () {
@@ -332,11 +333,10 @@ public class NoteData {
 	public void save () {
 		NotesDatabase database = new NotesDatabase();
 		database.QueryNoResults("UPDATE notes SET text = '" + this.get_text() + "', " + 
-					    		  "color = '" + this.get_color() + "'" +  
-								  ", pos_x = " + this.get_pos_x() + " " + 
-								  ", pos_y = " + this.get_pos_y() + " " + 
-							   	  "WHERE id = " + this.get_id()
-								 );
+					    		"color = '" + this.get_color() + "'" +  
+								", pos_x = " + this.get_pos_x() + " " + 
+								", pos_y = " + this.get_pos_y() + " " + 
+							   	"WHERE id = " + this.get_id());
 	}
 
 	public void remove () {
@@ -346,6 +346,7 @@ public class NoteData {
 
 }
 
+
 public class NotesDatabase {
 
 	private IDbConnection dbcon;
@@ -353,22 +354,19 @@ public class NotesDatabase {
 
 	public NotesDatabase() {
 
-		// Create a database if none exists.
+		// Create a database if there isn't one already.
 		try {
 			QueryNoResults("SELECT * FROM notes");
-		}
-		catch (SqliteSyntaxException) {
+		} catch (SqliteSyntaxException) {
 
 			QueryNoResults("CREATE TABLE notes ( " +
 							"text TEXT, color TEXT, " + 
 							"pos_x INTEGER, pos_y INTEGER, " +
 							"id INTEGER PRIMARY KEY AUTOINCREMENT )");
-
 			QueryNoResults("INSERT INTO notes " + 
 							 "(text, color, pos_x, pos_y) VALUES " + 
 							 "('Welcome to Sticky! This \nis your first note. Just \nclick on it to edit it.\n" + 
 							 "Do not worry about \nsaving, it is all done \nautomatically.', '#f4ff51', 100, 100)");
-
 			QueryNoResults("INSERT INTO notes " + 
 							 "(text, color, pos_x, pos_y) VALUES " + 
 							 "('Remove all text in a note to delete it.', '#f4ff51', 250, 250)");
@@ -391,7 +389,14 @@ public class NotesDatabase {
 		this.dbcon = null;		 
 	}
 
-	public NoteData[] fetch_notes() {
+	public void QueryNoResults (String query) {
+		this.OpenConnection ();
+		this.dbcmd.CommandText = query;
+		this.dbcmd.ExecuteNonQuery();
+		this.CloseConnection();
+	}
+
+	public NoteData[] FetchNotes() {
 		this.OpenConnection();
 		this.dbcmd.CommandText = "SELECT COUNT(id) FROM notes";
 		IDataReader count_reader = dbcmd.ExecuteReader();
@@ -420,18 +425,12 @@ public class NotesDatabase {
 		return arr;
 	}
 	
-	public void QueryNoResults (String query) {
-		this.OpenConnection ();
-		this.dbcmd.CommandText = query;
-		this.dbcmd.ExecuteNonQuery();
-		this.CloseConnection();
-	}
-
 	public int get_last_id () {
 		this.OpenConnection ();
 		this.dbcmd.CommandText = "SELECT id FROM notes ORDER BY id DESC LIMIT 1";
 		IDataReader reader = this.dbcmd.ExecuteReader();
 		reader.Read();
+		reader = null;
 		this.CloseConnection();
 		return int.Parse(reader.GetString (0));
 	}
