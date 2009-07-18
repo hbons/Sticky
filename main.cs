@@ -131,22 +131,15 @@ public class StickyUI {
 	}
 
 	public string RandomColor() {
-		string color;
-		int result;
 		GLib.List colors = new GLib.List (typeof (string));
-		Random random = new Random();
-
 		colors.Append("#f4ff51");
 		colors.Append("#f7ba5f");
 		colors.Append("#88dcd5");
 		colors.Append("#b3f75f");
 		colors.Append("#f75f77");
 		colors.Append("#dc5ff7");
-
-		result = random.Next(colors.Count);
-		color = ""+colors[result];
-		Console.WriteLine(color);
-		return color;
+		Random random = new Random();
+		return (string)colors[random.Next(colors.Count)];
 	}
 
 	static void Window_Delete (object obj, DeleteEventArgs args)
