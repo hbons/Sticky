@@ -322,7 +322,7 @@ public class NoteData {
 	}
 
 	public String get_color() {
-		return "#"+this.color;
+		return this.color;
 	}
 
 	public int get_pos_x() {
